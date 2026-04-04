@@ -3,8 +3,8 @@
 
     <!-- Reference the parent -->
     <parent>
-        <groupId>edu.cs342.project2</groupId>
-        <artifactId>weather-app</artifactId>
+        <groupId>edu.uic.cs342.project3</groupId>
+        <artifactId>checkers-game</artifactId>
         <version>1.0-SNAPSHOT</version>
     </parent>
 
