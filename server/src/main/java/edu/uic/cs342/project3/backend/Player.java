@@ -41,7 +41,6 @@ public class Player implements Serializable {
     @JsonProperty("draws")
     private int draws;
 
-    @JsonProperty("status")
     private Status status;
 
     @JsonProperty("friends")
@@ -148,5 +147,45 @@ public class Player implements Serializable {
                 this.friends.equals(other.friends);
     }
 
+    public void addFriend(Player friend) throws NullPointerException {
+        if (friend == null) {
+            throw new NullPointerException("friend is null");
+        }
+        this.friends.add(friend);
+    }
 
+    public void addFriends(List<Player> friends) throws NullPointerException {
+        if (friends == null) {
+            throw new NullPointerException("friends is null");
+        }
+        this.friends.addAll(friends);
+    }
+
+    public void removeFriend(Player friend) throws NullPointerException {
+        if (friend == null) {
+            throw new NullPointerException("friend is null");
+        }
+
+        this.friends.remove(friend);
+    }
+
+    public void removeFriends(List<Player> friends) throws NullPointerException {
+        if (friends == null) {
+            throw new RuntimeException("friends is null");
+        }
+
+        this.friends.removeAll(friends);
+    }
+
+    public void addWin() { ++this.wins; }
+
+    public void addWins(int wins) { this.wins += wins; }
+
+    public void addLoss() { ++this.losses; }
+
+    public void addLosses(int losses) { this.losses += losses; }
+
+    public void addDraw() { ++this.draws; }
+
+    public void addDraws(int draws) { this.draws += draws; }
 }
