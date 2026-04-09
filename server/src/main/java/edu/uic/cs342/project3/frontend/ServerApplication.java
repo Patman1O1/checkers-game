@@ -2,7 +2,6 @@ package edu.uic.cs342.project3;
 
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
@@ -23,22 +22,15 @@ public class ServerApplication extends Application {
     public static void main(String[] args) { Application.launch(args); }
 
     @Override
-    public void start(Stage primaryStage) {
+    public void start(Stage stage) {
         try {
-            // Load FXML
-            FXMLLoader fxmlLoader = new FXMLLoader(ServerApplication.FXML);
-            Parent root = fxmlLoader.load();
-            Scene scene = new Scene(root);
-
-            // Apply CSS
+            FXMLLoader loader = new FXMLLoader(ServerApplication.FXML);
+            Scene scene = new Scene(loader.load(), 960, 640);
             scene.getStylesheets().add(Objects.requireNonNull(ServerApplication.CSS).toExternalForm());
 
-            // Set the application title
-            primaryStage.setTitle("Checkers");
-
-            // Display the application
-            primaryStage.setScene(scene);
-            primaryStage.show();
+            stage.setTitle("Checkers Server");
+            stage.setScene(scene);
+            stage.show();
         } catch (Exception exception) {
             ServerApplication.LOGGER.log(Level.SEVERE, exception.getMessage(), exception);
         }
