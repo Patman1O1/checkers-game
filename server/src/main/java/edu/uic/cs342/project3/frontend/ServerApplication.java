@@ -1,4 +1,4 @@
-package edu.uic.cs342.project3;
+package edu.uic.cs342.project3.frontend;
 
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
