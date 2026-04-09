@@ -1,6 +1,5 @@
 package edu.uic.cs342.project3.backend;
 
-import com.fasterxml.jackson.core.JacksonException;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
@@ -9,12 +8,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class PlayerDeserializer extends JsonDeserializer<Player> {
-    private Player deserializePlayer(JsonNode jsonNode) {
-
-    }
-
     @Override
     public Player deserialize(JsonParser jsonParser, DeserializationContext deserializationContext)
             throws IOException, NullPointerException {
@@ -46,14 +43,15 @@ public class PlayerDeserializer extends JsonDeserializer<Player> {
         int draws = jsonNode.get("draws").asInt();
 
         // Read the player's friends
-        List<Item> items = new ArrayList<>();
+        List<Player> friends = new ArrayList<>();
         arrayNode = (ArrayNode) jsonNode.get("items");
         if (arrayNode != null) {
             for (JsonNode itemNode : arrayNode) {
-                items.add(objectMapper.treeToValue(itemNode, Item.class));
+                friends.add(objectMapper.treeToValue(itemNode, Player.class));
             }
         }
 
-        return null;
+        // Create and return a new instance of Player with the deserialized fields
+        return new Player(username, password, wins, losses, draws, Player.Status.ONLINE, friends);
     }
 }
