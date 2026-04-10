@@ -14,8 +14,14 @@ public class PlayerFile extends File {
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
     // ── Constructors ─────────────────────────────────────────────────────────────────────────────────────────────────
-    public PlayerFile(String filename) throws NullPointerException {
+    public PlayerFile(String filename) throws IOException, NullPointerException {
         super(System.getProperty("user.dir"), String.format("players/%s", filename));
+
+        // Make sure "$PROJECT_ROOT/players" exists where $PROJECT_ROOT is the project root directory
+        boolean ignored1 = super.getParentFile().mkdirs();
+
+        // Create the file if it doesn't already exist
+        boolean ignored2 = super.createNewFile();
     }
 
     // ── Methods ──────────────────────────────────────────────────────────────────────────────────────────────────────
