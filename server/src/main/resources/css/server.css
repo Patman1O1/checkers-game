@@ -1,0 +1,315 @@
+/* =============================================
+   Server Terminal GUI — terminal.css
+   Mimics macOS terminal / retro green-on-black
+   ============================================= */
+
+/* ---- Root ---- */
+.root {
+    -fx-background-color: #0d0d0d;
+    -fx-font-family: "JetBrains Mono", "Fira Code", "Consolas", "Courier New", monospace;
+    -fx-font-size: 13px;
+    -fx-min-width: 800px;
+    -fx-min-height: 600px;
+}
+
+/* ---- Title Bar ---- */
+.title-bar {
+    -fx-background-color: #1a1a1a;
+    -fx-padding: 10 16 10 16;
+    -fx-border-color: #2a2a2a;
+    -fx-border-width: 0 0 1 0;
+    -fx-min-height: 40px;
+    -fx-max-width: Infinity;
+}
+
+.title-label {
+    -fx-text-fill: #6b7280;
+    -fx-font-size: 12px;
+    -fx-font-family: "JetBrains Mono", "Fira Code", "Consolas", monospace;
+    -fx-padding: 0 0 0 16;
+}
+
+.status-dot-online {
+    -fx-background-color: #22c55e;
+    -fx-background-radius: 50%;
+    -fx-min-width: 8px;
+    -fx-min-height: 8px;
+    -fx-max-width: 8px;
+    -fx-max-height: 8px;
+    -fx-effect: dropshadow(gaussian, #22c55e, 6, 0.8, 0, 0);
+}
+
+.status-label-online {
+    -fx-text-fill: #22c55e;
+    -fx-font-size: 10px;
+    -fx-font-family: "JetBrains Mono", "Fira Code", "Consolas", monospace;
+    -fx-font-weight: bold;
+}
+
+.status-button-start {
+    -fx-background-color: #14532d;
+    -fx-text-fill: #4ade80;
+    -fx-border-color: #166534;
+}
+
+.status-button-start:hover {
+    -fx-background-color: #166534;
+    -fx-text-fill: #86efac;
+}
+
+.status-dot-offline {
+    -fx-background-color: #ef4444;
+    -fx-background-radius: 50%;
+    -fx-min-width: 8px;
+    -fx-min-height: 8px;
+    -fx-max-width: 8px;
+    -fx-max-height: 8px;
+}
+
+.status-label-offline {
+    -fx-text-fill: #ef4444;
+    -fx-font-size: 10px;
+    -fx-font-family: "JetBrains Mono", "Fira Code", "Consolas", monospace;
+    -fx-font-weight: bold;
+}
+
+.status-button-stop {
+    -fx-background-color: #450a0a;
+    -fx-text-fill: #f87171;
+    -fx-border-color: #7f1d1d;
+}
+
+.status-button-stop:hover {
+    -fx-background-color: #7f1d1d;
+    -fx-text-fill: #fca5a5;
+}
+
+.client-count-label {
+    -fx-text-fill: #4b5563;
+    -fx-font-size: 10px;
+    -fx-font-family: "JetBrains Mono", "Fira Code", "Consolas", monospace;
+    -fx-padding: 0 0 0 8;
+}
+
+/* ---- Stats Bar ---- */
+.stats-bar {
+    -fx-background-color: #111111;
+    -fx-padding: 6 16 6 16;
+    -fx-border-color: #1f2937;
+    -fx-border-width: 0 0 1 0;
+    -fx-min-height: 32px;
+    -fx-max-width: Infinity;
+}
+
+.stat-key {
+    -fx-text-fill: #6b7280 ;
+    -fx-font-size: 10px;
+    -fx-font-family: "JetBrains Mono", "Fira Code", "Consolas", monospace;
+}
+.stat-value {
+    -fx-text-fill: #9ca3af;
+    -fx-font-size: 10px;
+    -fx-font-family: "JetBrains Mono", "Fira Code", "Consolas", monospace;
+    -fx-font-weight: bold;
+}
+.stat-value-green {
+    -fx-text-fill: #22c55e;
+    -fx-font-size: 10px;
+    -fx-font-family: "JetBrains Mono", "Fira Code", "Consolas", monospace;
+    -fx-font-weight: bold;
+}
+.stat-value-yellow {
+    -fx-text-fill: #eab308;
+    -fx-font-size: 10px;
+    -fx-font-family: "JetBrains Mono", "Fira Code", "Consolas", monospace;
+    -fx-font-weight: bold;
+}
+.stat-divider {
+    -fx-background-color: #1f2937;
+    -fx-min-width: 1px;
+    -fx-max-width: 1px;
+    -fx-pref-height: 12px;
+}
+.clock-label {
+    -fx-text-fill: #374151;
+    -fx-font-size: 10px;
+    -fx-font-family: "JetBrains Mono", "Fira Code", "Consolas", monospace;
+}
+
+/* ---- ListView log list ---- */
+.log-list {
+    -fx-background-color: #0d0d0d;
+    -fx-border-color: transparent;
+    -fx-padding: 4 0 4 0;
+}
+.log-list > .virtual-flow > .clipped-container > .sheet > .list-cell {
+    -fx-background-color: transparent;
+    -fx-padding: 0;
+}
+.log-list .list-cell {
+    -fx-background-color: transparent;
+    -fx-padding: 1 16 1 16;
+    -fx-font-family: "JetBrains Mono", "Fira Code", "Consolas", "Courier New", monospace;
+    -fx-font-size: 13px;
+}
+.log-list .list-cell:hover {
+    -fx-background-color: rgba(255, 255, 255, 0.02);
+}
+.log-list .list-cell:selected,
+.log-list .list-cell:selected:hover {
+    -fx-background-color: rgba(255, 255, 255, 0.04);
+}
+/* Scrollbar — slim dark style */
+.log-list .scroll-bar:vertical {
+    -fx-background-color: #111111;
+    -fx-pref-width: 6px;
+}
+.log-list .scroll-bar:vertical .thumb {
+    -fx-background-color: #2a2a2a;
+    -fx-background-radius: 3px;
+}
+.log-list .scroll-bar:vertical .increment-button,
+.log-list .scroll-bar:vertical .decrement-button {
+    -fx-pref-height: 0;
+    -fx-min-height: 0;
+}
+.log-list .scroll-bar:horizontal { -fx-pref-height: 0; -fx-min-height: 0; }
+
+/* ---- Log Line Rows ---- */
+
+/* Base row — every log line uses one of these */
+.log-row {
+    -fx-padding: 1 0 1 0;
+    -fx-background-color: transparent;
+}
+.log-row:hover {
+    -fx-background-color: rgba(255, 255, 255, 0.02);
+}
+
+/* Command echo (green prompt line) */
+.log-command {
+    -fx-text-fill: #4ade80;
+    -fx-font-size: 13px;
+    -fx-font-family: "JetBrains Mono", "Fira Code", "Consolas", monospace;
+    -fx-padding: 4 0 2 0;
+}
+.log-command-text {
+    -fx-text-fill: #f9fafb;
+    -fx-font-size: 13px;
+    -fx-font-family: "JetBrains Mono", "Fira Code", "Consolas", monospace;
+}
+
+/* INFO — default grey output */
+.log-info {
+    -fx-text-fill: #9ca3af;
+    -fx-font-size: 13px;
+    -fx-font-family: "JetBrains Mono", "Fira Code", "Consolas", monospace;
+}
+
+/* SUCCESS — bright green */
+.log-success {
+    -fx-text-fill: #4ade80;
+    -fx-font-size: 13px;
+    -fx-font-family: "JetBrains Mono", "Fira Code", "Consolas", monospace;
+}
+
+/* WARN — amber */
+.log-warn {
+    -fx-text-fill: #fbbf24;
+    -fx-font-size: 13px;
+    -fx-font-family: "JetBrains Mono", "Fira Code", "Consolas", monospace;
+}
+
+/* ERROR — red */
+.log-error {
+    -fx-text-fill: #f87171;
+    -fx-font-size: 13px;
+    -fx-font-family: "JetBrains Mono", "Fira Code", "Consolas", monospace;
+}
+
+/* GAME — cyan / teal for game events */
+.log-game {
+    -fx-text-fill: #22d3ee;
+    -fx-font-size: 13px;
+    -fx-font-family: "JetBrains Mono", "Fira Code", "Consolas", monospace;
+}
+
+/* CHAT — purple for chat messages */
+.log-chat {
+    -fx-text-fill: #a78bfa;
+    -fx-font-size: 13px;
+    -fx-font-family: "JetBrains Mono", "Fira Code", "Consolas", monospace;
+}
+
+/* Timestamp prefix on each row */
+.log-timestamp {
+    -fx-text-fill: #374151;
+    -fx-font-size: 11px;
+    -fx-font-family: "JetBrains Mono", "Fira Code", "Consolas", monospace;
+    -fx-padding: 0 8 0 0;
+}
+
+/* Badge tags like [INFO], [WARN], [ERROR] */
+.badge-info    { -fx-background-color: #1e3a5f; -fx-text-fill: #60a5fa;
+    -fx-background-radius: 3; -fx-padding: 1 6 1 6; -fx-font-size: 10px; }
+.badge-success { -fx-background-color: #14532d; -fx-text-fill: #4ade80;
+    -fx-background-radius: 3; -fx-padding: 1 6 1 6; -fx-font-size: 10px; }
+.badge-warn    { -fx-background-color: #451a03; -fx-text-fill: #fbbf24;
+    -fx-background-radius: 3; -fx-padding: 1 6 1 6; -fx-font-size: 10px; }
+.badge-error   { -fx-background-color: #450a0a; -fx-text-fill: #f87171;
+    -fx-background-radius: 3; -fx-padding: 1 6 1 6; -fx-font-size: 10px; }
+.badge-game    { -fx-background-color: #0c4a6e; -fx-text-fill: #22d3ee;
+    -fx-background-radius: 3; -fx-padding: 1 6 1 6; -fx-font-size: 10px; }
+.badge-chat    { -fx-background-color: #2e1065; -fx-text-fill: #a78bfa;
+    -fx-background-radius: 3; -fx-padding: 1 6 1 6; -fx-font-size: 10px; }
+
+/* ---- Input Bar ---- */
+.input-bar {
+    -fx-background-color: #111111;
+    -fx-padding: 10 16 10 16;
+    -fx-border-color: #1f2937;
+    -fx-border-width: 1 0 0 0;
+    -fx-min-height: 44px;
+}
+
+.prompt-label {
+    -fx-text-fill: #4ade80;
+    -fx-font-size: 13px;
+    -fx-font-family: "JetBrains Mono", "Fira Code", "Consolas", monospace;
+}
+
+.command-input {
+    -fx-background-color: transparent;
+    -fx-text-fill: #f9fafb;
+    -fx-font-size: 13px;
+    -fx-font-family: "JetBrains Mono", "Fira Code", "Consolas", monospace;
+    -fx-border-color: transparent;
+    -fx-padding: 0;
+    -fx-prompt-text-fill: #374151;
+}
+.command-input:focused {
+    -fx-border-color: transparent;
+    -fx-effect: none;
+}
+
+.exec-button {
+    -fx-background-color: #1f2937;
+    -fx-text-fill: #4ade80;
+    -fx-font-size: 10px;
+    -fx-font-family: "JetBrains Mono", "Fira Code", "Consolas", monospace;
+    -fx-font-weight: bold;
+    -fx-padding: 4 10 4 10;
+    -fx-background-radius: 3;
+    -fx-cursor: hand;
+    -fx-border-color: #374151;
+    -fx-border-radius: 3;
+    -fx-border-width: 1;
+}
+.exec-button:hover {
+    -fx-background-color: #374151;
+    -fx-text-fill: #86efac;
+}
+.exec-button:pressed {
+    -fx-background-color: #4ade80;
+    -fx-text-fill: #0d0d0d;
+}
