@@ -1,16 +1,22 @@
 package edu.uic.cs342.project3.backend;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.module.SimpleModule;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.URI;
 
 public class PlayerFile extends File {
     // ── Fields ───────────────────────────────────────────────────────────────────────────────────────────────────────
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
     // ── Constructors ─────────────────────────────────────────────────────────────────────────────────────────────────
-    public PlayerFile(String pathname) throws NullPointerException { super(pathname); }
+    public PlayerFile(String filename) throws NullPointerException {
+        super(System.getProperty("user.dir"), String.format("players/%s", filename));
+    }
 
     // ── Methods ──────────────────────────────────────────────────────────────────────────────────────────────────────
     public Player read() throws IOException {
