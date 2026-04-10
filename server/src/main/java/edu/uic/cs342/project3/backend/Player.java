@@ -140,7 +140,7 @@ public class Player implements Serializable {
 
         Player other = (Player) object;
         return this.username.equals(other.username) &&
-                this.password.equals(other.username) &&
+                this.password.equals(other.password) &&
                 this.wins == other.wins &&
                 this.losses == other.losses &&
                 this.draws == other.draws &&
