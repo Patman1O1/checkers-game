@@ -35,17 +35,34 @@ public class PlayerSerializer extends JsonSerializer<Player> {
     @Override
     public void serialize(Player player, JsonGenerator jsonGenerator, SerializerProvider serializers)
             throws IOException, NullPointerException {
-        this.serializePlayer(player, jsonGenerator);
+        // Begin writing to the .json file
+        jsonGenerator.writeStartObject();
+
+        // Create the username field
+        jsonGenerator.writeStringField("username", player.getUsername());
+
+        // Create the password field
+        jsonGenerator.writeStringField("password", player.getPassword());
+
+        // Create the wins field
+        jsonGenerator.writeNumberField("wins", player.getWins());
+
+        // Create the losses field
+        jsonGenerator.writeNumberField("losses", player.getLosses());
+
+        // Create the draws field
+        jsonGenerator.writeNumberField("draws", player.getDraws());
 
         // Create the friends field
+        List<String> friends = player.getFriends();
         jsonGenerator.writeArrayFieldStart("friends");
-        List<Player> friends = player.getFriends();
         if (!friends.isEmpty()) {
-            for (Player friend : player.getFriends()) {
-                if (friend == null) {
+            for (String friendName : player.getFriends()) {
+                if (friendName == null) {
+                    jsonGenerator.writeNull();
                     continue;
                 }
-                this.serializePlayer(friend, jsonGenerator);
+                jsonGenerator.writeString(friendName);
             }
         }
         jsonGenerator.writeEndArray();
