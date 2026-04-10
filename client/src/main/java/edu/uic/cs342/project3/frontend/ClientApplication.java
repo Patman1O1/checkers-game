@@ -1,14 +1,12 @@
-package edu.uic.cs342.project3;
+package edu.uic.cs342.project3.frontend;
 
 import javafx.application.Application;
 import javafx.stage.Stage;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 public class ClientApplication extends Application {
-    private static final Logger LOGGER = Logger.getLogger(ClientApplication.class.getName());
+    // ── Fields ───────────────────────────────────────────────────────────────────────────────────────────────────────
 
+    // ── Methods ──────────────────────────────────────────────────────────────────────────────────────────────────────
     public static void main(String[] args) { Application.launch(args); }
 
     @Override
@@ -16,7 +14,7 @@ public class ClientApplication extends Application {
         try {
 
         } catch (Exception exception) {
-            ClientApplication.LOGGER.log(Level.SEVERE, exception.getMessage(), exception);
+
         }
     }
 }
