@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
+import java.io.File;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -44,7 +45,7 @@ public class Player implements Serializable {
     private Status status;
 
     @JsonProperty("friends")
-    private List<Player> friends;
+    private List<String> friends;
 
     // ── Constructors ──────────────────────────────────────────────────────────────────────────────────────────────────────
     public Player() {
@@ -76,7 +77,7 @@ public class Player implements Serializable {
                   int losses,
                   int draws,
                   Status status,
-                  List<Player> friends) throws NullPointerException {
+                  List<String> friends) throws NullPointerException {
         if (username == null) {
             throw new NullPointerException("username is null");
         }
@@ -121,7 +122,7 @@ public class Player implements Serializable {
 
     public int getDraws() { return this.draws; }
 
-    public List<Player> getFriends() { return this.friends; }
+    public List<String> getFriends() { return this.friends; }
 
     // ── Methods ──────────────────────────────────────────────────────────────────────────────────────────────────────
     @Override
@@ -147,29 +148,29 @@ public class Player implements Serializable {
                 this.friends.equals(other.friends);
     }
 
-    public void addFriend(Player friend) throws NullPointerException {
+    public void addFriend(String friend) throws NullPointerException {
         if (friend == null) {
             throw new NullPointerException("friend is null");
         }
         this.friends.add(friend);
     }
 
-    public void addFriends(List<Player> friends) throws NullPointerException {
+    public void addFriends(List<String> friends) throws NullPointerException {
         if (friends == null) {
             throw new NullPointerException("friends is null");
         }
         this.friends.addAll(friends);
     }
 
-    public void removeFriend(Player friend) throws NullPointerException {
-        if (friend == null) {
+    public void removeFriend(String friendName) throws NullPointerException {
+        if (friendName == null) {
             throw new NullPointerException("friend is null");
         }
 
-        this.friends.remove(friend);
+        this.friends.remove(friendName);
     }
 
-    public void removeFriends(List<Player> friends) throws NullPointerException {
+    public void removeFriends(List<String> friends) throws NullPointerException {
         if (friends == null) {
             throw new RuntimeException("friends is null");
         }
@@ -188,4 +189,8 @@ public class Player implements Serializable {
     public void addDraw() { ++this.draws; }
 
     public void addDraws(int draws) { this.draws += draws; }
+
+    public void save(File playerFile) {
+
+    }
 }
