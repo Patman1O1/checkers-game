@@ -43,11 +43,11 @@ public class PlayerDeserializer extends JsonDeserializer<Player> {
         int draws = jsonNode.get("draws").asInt();
 
         // Read the player's friends
-        List<Player> friends = new ArrayList<>();
+        List<String> friends = new ArrayList<>();
         arrayNode = (ArrayNode) jsonNode.get("items");
         if (arrayNode != null) {
             for (JsonNode itemNode : arrayNode) {
-                friends.add(objectMapper.treeToValue(itemNode, Player.class));
+                friends.add(objectMapper.treeToValue(itemNode, String.class));
             }
         }
 
