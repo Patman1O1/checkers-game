@@ -2,16 +2,16 @@ package edu.uic.cs342.project3.backend;
 
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class PlayerDeserializer extends JsonDeserializer<Player> {
+public class PlayerDeserializer extends StdDeserializer<Player> {
+    public PlayerDeserializer() { super(Player.class); }
+
     @Override
     public Player deserialize(JsonParser jsonParser, DeserializationContext deserializationContext)
             throws IOException, NullPointerException {
@@ -23,35 +23,26 @@ public class PlayerDeserializer extends JsonDeserializer<Player> {
             throw new NullPointerException("deserializationContext is null");
         }
 
-        JsonNode jsonNode = jsonParser.getCodec().readTree(jsonParser);
-        ArrayNode arrayNode;
-        ObjectMapper objectMapper = (ObjectMapper) jsonParser.getCodec();
+        JsonNode rootNode = jsonParser.getCodec().readTree(jsonParser);
 
-        // Read the player's username
-        String username = jsonNode.get("username").asText();
+        String username = rootNode.get("username").asText();
 
-        // Read the player's password
-        String password = jsonNode.get("password").asText();
+        String password = rootNode.get("password").asText();
 
-        // Read the player's wins
-        int wins = jsonNode.get("wins").asInt();
+        int wins = rootNode.get("wins").asInt();
 
-        // Read the player's losses
-        int losses = jsonNode.get("losses").asInt();
+        int losses = rootNode.get("losses").asInt();
 
-        // Read the player's draws
-        int draws = jsonNode.get("draws").asInt();
+        int draws = rootNode.get("draws").asInt();
 
-        // Read the player's friends
         List<String> friends = new ArrayList<>();
-        arrayNode = (ArrayNode) jsonNode.get("items");
-        if (arrayNode != null) {
-            for (JsonNode itemNode : arrayNode) {
-                friends.add(objectMapper.treeToValue(itemNode, String.class));
+        JsonNode friendsNode = rootNode.get("friends");
+        if (!friendsNode.isEmpty()) {
+            for (JsonNode friendNode : friendsNode) {
+                friends.add(friendNode.asText());
             }
         }
 
-        // Create and return a new instance of Player with the deserialized fields
-        return new Player(username, password, wins, losses, draws, Player.Status.ONLINE, friends);
+        return new Player(username, password, wins, losses, draws, Player.Status.OFFLINE, friends);
     }
 }
