@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+
+<StackPane xmlns:fx="http://javafx.com/fxml"
+           fx:controller="edu.uic.cs342.project3.frontend.LoginController"
+           styleClass="screen-root">
+
+    <Region styleClass="bg-gradient"/>
+
+    <VBox alignment="CENTER" maxWidth="420">
+
+        <VBox alignment="CENTER" spacing="8" styleClass="brand-header">
+            <StackPane styleClass="crown-circle">
+                <Label text="♛" styleClass="crown-icon"/>
+            </StackPane>
+            <Label text="Checkers Online" styleClass="brand-title"/>
+            <Label text="Multiplayer Checkers with AI" styleClass="brand-subtitle"/>
+        </VBox>
+
+        <!-- Tab pane: Login / Sign Up -->
+        <TabPane fx:id="tabPane" styleClass="auth-tabs" tabClosingPolicy="UNAVAILABLE">
+
+            <!-- LOGIN TAB -->
+            <Tab text="Login" styleClass="auth-tab">
+                <VBox styleClass="auth-card" spacing="16">
+                    <Label text="Welcome Back" styleClass="card-title"/>
+                    <Label text="Enter your credentials to play" styleClass="card-subtitle"/>
+
+                    <VBox spacing="6">
+                        <Label text="Username" styleClass="field-label"/>
+                        <TextField fx:id="loginUsername"
+                                   promptText="Enter your username"
+                                   styleClass="auth-field"/>
+                    </VBox>
+
+                    <VBox spacing="6">
+                        <Label text="Password" styleClass="field-label"/>
+                        <PasswordField fx:id="loginPassword"
+                                       promptText="Enter your password"
+                                       styleClass="auth-field"/>
+                    </VBox>
+
+                    <Button fx:id="loginButton"
+                            text="Login"
+                            styleClass="primary-button"
+                            maxWidth="Infinity"
+                            onAction="#handleLogin"/>
+                </VBox>
+            </Tab>
+
+            <!-- SIGN UP TAB -->
+            <Tab text="Sign Up" styleClass="auth-tab">
+                <VBox styleClass="auth-card" spacing="16">
+                    <Label text="Create Account" styleClass="card-title"/>
+                    <Label text="Sign up to start playing" styleClass="card-subtitle"/>
+
+                    <VBox spacing="6">
+                        <Label text="Username" styleClass="field-label"/>
+                        <TextField fx:id="signupUsername"
+                                   promptText="Choose a unique username"
+                                   styleClass="auth-field"/>
+                    </VBox>
+
+                    <VBox spacing="6">
+                        <Label text="Password" styleClass="field-label"/>
+                        <PasswordField fx:id="signupPassword"
+                                       promptText="Create a password (min 6 characters)"
+                                       styleClass="auth-field"/>
+                    </VBox>
+
+                    <VBox spacing="6">
+                        <Label text="Confirm Password" styleClass="field-label"/>
+                        <PasswordField fx:id="signupConfirm"
+                                       promptText="Re-enter your password"
+                                       styleClass="auth-field"/>
+                    </VBox>
+
+                    <Button fx:id="signupButton"
+                            text="Sign Up"
+                            styleClass="primary-button"
+                            maxWidth="Infinity"
+                            onAction="#handleSignup"/>
+                </VBox>
+            </Tab>
+        </TabPane>
+    </VBox>
+</StackPane>
