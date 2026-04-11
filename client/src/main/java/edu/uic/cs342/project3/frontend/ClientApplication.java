@@ -1,5 +1,6 @@
 package edu.uic.cs342.project3.frontend;
 
+import atlantafx.base.theme.PrimerDark;
 import javafx.application.Application;
 import javafx.stage.Stage;
 
@@ -18,6 +19,8 @@ public class ClientApplication extends Application {
     @Override
     public void start(Stage primaryStage) {
         try {
+            Application.setUserAgentStylesheet(new PrimerDark().getUserAgentStylesheet());
+
             this.sceneManager = SceneManager.getInstance();
             this.sceneManager.setPrimaryStage(primaryStage);
             this.sceneManager.showLoginScene();
