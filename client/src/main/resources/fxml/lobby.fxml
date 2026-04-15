@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+
+<!-- mirrors Lobby.tsx: 3-column layout: stats+actions | online users | friends -->
+<BorderPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="edu.uic.cs342.project3.controller.LobbyController"
+            styleClass="lobby-root"
+            prefWidth="1100" prefHeight="700">
+
+    <!-- ── Header ────────────────────────────────────────────────────────────── -->
+    <top>
+        <HBox styleClass="lobby-header" alignment="CENTER_LEFT" spacing="16">
+            <padding><Insets top="14" right="20" bottom="14" left="20"/></padding>
+            <Label text="♟" styleClass="header-crown"/>
+            <VBox spacing="2">
+                <Label text="Game Lobby" styleClass="lobby-title"/>
+                <Label fx:id="welcomeLabel" text="Welcome!" styleClass="lobby-subtitle"/>
+            </VBox>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Label fx:id="statusLabel" text="" styleClass="status-msg" visible="false" managed="false"/>
+            <Button text="Logout" onAction="#handleLogout" styleClass="danger-button"/>
+        </HBox>
+    </top>
+
+    <!-- ── Main Content (3 columns) ─────────────────────────────────────────── -->
+    <center>
+        <HBox spacing="16">
+            <padding><Insets top="16" right="16" bottom="16" left="16"/></padding>
+
+            <!-- ── Left Column: Stats + New Game ─────────────────────────────── -->
+            <VBox spacing="14" prefWidth="260" minWidth="220">
+
+                <!-- Stats card -->
+                <VBox styleClass="card" spacing="10">
+                    <Label text="🏆  Your Statistics" styleClass="card-title"/>
+                    <Separator/>
+
+                    <HBox alignment="CENTER_LEFT" spacing="8">
+                        <Label text="Wins"   styleClass="stat-label" HBox.hgrow="ALWAYS"/>
+                        <Label fx:id="winsLabel" text="0" styleClass="stat-wins"/>
+                    </HBox>
+                    <HBox alignment="CENTER_LEFT" spacing="8">
+                        <Label text="Losses" styleClass="stat-label" HBox.hgrow="ALWAYS"/>
+                        <Label fx:id="lossesLabel" text="0" styleClass="stat-losses"/>
+                    </HBox>
+                    <HBox alignment="CENTER_LEFT" spacing="8">
+                        <Label text="Draws"  styleClass="stat-label" HBox.hgrow="ALWAYS"/>
+                        <Label fx:id="drawsLabel" text="0" styleClass="stat-draws"/>
+                    </HBox>
+                    <Separator/>
+                    <HBox alignment="CENTER_LEFT" spacing="8">
+                        <Label text="Win Rate" styleClass="stat-label" HBox.hgrow="ALWAYS"/>
+                        <Label fx:id="winRateLabel" text="0.0%" styleClass="stat-rate"/>
+                    </HBox>
+                </VBox>
+
+                <!-- New Game card -->
+                <VBox styleClass="card" spacing="10" VBox.vgrow="ALWAYS">
+                    <Label text="🎮  Start New Game" styleClass="card-title"/>
+                    <Separator/>
+
+                    <Button text="🤖  Play vs AI"
+                            onAction="#handlePlayVsAI"
+                            styleClass="ai-button"
+                            maxWidth="Infinity"/>
+
+                    <Button fx:id="challengeButton"
+                            text="⚔  Challenge Selected Player"
+                            onAction="#handleChallengeSelected"
+                            styleClass="challenge-button"
+                            maxWidth="Infinity"
+                            disable="true"/>
+
+                    <Button fx:id="challengeFriendButton"
+                            text="👥  Challenge Selected Friend"
+                            onAction="#handleChallengeFriend"
+                            styleClass="challenge-button"
+                            maxWidth="Infinity"/>
+                </VBox>
+            </VBox>
+
+            <!-- ── Middle Column: Online Players ─────────────────────────────── -->
+            <VBox spacing="10" HBox.hgrow="ALWAYS">
+                <VBox styleClass="card" VBox.vgrow="ALWAYS" spacing="10">
+                    <Label text="🟢  Online Players" styleClass="card-title"/>
+                    <Label text="Click a player to select them, then click Challenge" styleClass="card-subtitle"/>
+                    <Separator/>
+                    <ListView fx:id="onlineUsersList"
+                              styleClass="player-list"
+                              VBox.vgrow="ALWAYS"/>
+                </VBox>
+            </VBox>
+
+            <!-- ── Right Column: Friends ──────────────────────────────────────── -->
+            <VBox spacing="14" prefWidth="280" minWidth="240">
+
+                <!-- Add friend -->
+                <VBox styleClass="card" spacing="10">
+                    <Label text="➕  Add Friend" styleClass="card-title"/>
+                    <HBox spacing="8">
+                        <TextField fx:id="addFriendField"
+                                   promptText="Enter username"
+                                   styleClass="auth-field"
+                                   HBox.hgrow="ALWAYS"
+                                   onAction="#handleAddFriend"/>
+                        <Button text="Add" onAction="#handleAddFriend" styleClass="secondary-button"/>
+                    </HBox>
+                </VBox>
+
+                <!-- Friends list -->
+                <VBox styleClass="card" VBox.vgrow="ALWAYS" spacing="10">
+                    <Label text="👥  Friends" styleClass="card-title"/>
+                    <Label text="● = Online  ○ = Offline" styleClass="card-subtitle"/>
+                    <Separator/>
+                    <ListView fx:id="friendsList"
+                              styleClass="player-list"
+                              VBox.vgrow="ALWAYS"/>
+                </VBox>
+            </VBox>
+        </HBox>
+    </center>
+</BorderPane>
