@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+
+<BorderPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="edu.uic.cs342.project3.ServerController"
+            styleClass="server-root"
+            prefWidth="820" prefHeight="560">
+
+    <!-- ── Top Status Bar ───────────────────────────────────────────────────── -->
+    <top>
+        <HBox styleClass="status-bar" spacing="20" alignment="CENTER_LEFT">
+            <padding><Insets top="10" right="16" bottom="10" left="16"/></padding>
+
+            <Label text="♟ Checkers Server" styleClass="server-title"/>
+
+            <Region HBox.hgrow="ALWAYS"/>
+
+            <Label fx:id="statusLabel"  text="● Starting…" styleClass="status-badge"/>
+            <Label fx:id="portLabel"    text="Port: 8080"   styleClass="info-badge"/>
+            <Label fx:id="onlineLabel"  text="Online: 0"    styleClass="info-badge"/>
+            <Label fx:id="gamesLabel"   text="Games: 0"     styleClass="info-badge"/>
+        </HBox>
+    </top>
+
+    <!-- ── Log List ─────────────────────────────────────────────────────────── -->
+    <center>
+        <VBox spacing="0">
+            <padding><Insets top="0" right="12" bottom="0" left="12"/></padding>
+
+            <Label text="Activity Log" styleClass="section-label">
+                <VBox.margin><Insets top="10" bottom="4"/></VBox.margin>
+            </Label>
+
+            <ListView fx:id="logList"
+                      styleClass="log-list"
+                      VBox.vgrow="ALWAYS"/>
+        </VBox>
+    </center>
+
+    <!-- ── Bottom Toolbar ───────────────────────────────────────────────────── -->
+    <bottom>
+        <HBox styleClass="toolbar" spacing="10" alignment="CENTER_RIGHT">
+            <padding><Insets top="8" right="12" bottom="8" left="12"/></padding>
+
+            <Button text="Refresh Stats" onAction="#refreshStats" styleClass="tool-button"/>
+            <Button text="Clear Log"     onAction="#clearLog"     styleClass="tool-button danger"/>
+        </HBox>
+    </bottom>
+</BorderPane>
