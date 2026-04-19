@@ -21,6 +21,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.text.Text;
 
+import java.net.URL;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -28,7 +29,9 @@ import java.util.concurrent.TimeUnit;
 
 public class GameController {
     // ── Fields ───────────────────────────────────────────────────────────────────────────────────────────────────────
-    private static final ObjectMapper MAPPER = new ObjectMapper();
+    private static URL SCENE_FXML = GameController.class.getResource("/fxml/game.fxml");
+
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
     private final ScheduledExecutorService scheduler;
 
@@ -117,7 +120,7 @@ public class GameController {
 
         this.client.sendChatMessage(this.gameId, this.username, message,
                 json -> this.loadGameState(),
-                err  -> this.statusLabel.setText("Chat error: " + err));
+                error -> this.statusLabel.setText(String.format("Chat error: %s", error)));
     }
 
     @FXML
@@ -132,7 +135,7 @@ public class GameController {
         this.client.getGameState(this.gameId,
                 json -> {
                     try {
-                        GameState state = GameController.MAPPER.treeToValue(json.get("gameState"), GameState.class);
+                        GameState state = GameController.OBJECT_MAPPER.treeToValue(json.get("gameState"), GameState.class);
                         this.applyState(state);
                     } catch (Exception exception) {
                         this.statusLabel.setText(String.format("Error parsing state: %s", exception.getMessage()));
