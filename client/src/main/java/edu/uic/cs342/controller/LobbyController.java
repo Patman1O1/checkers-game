@@ -19,8 +19,6 @@ import java.util.concurrent.TimeUnit;
 
 public class LobbyController {
     // ── Fields ───────────────────────────────────────────────────────────────────────────────────────────────────────
-    private static final URL SCENE_FXML = LobbyController.class.getResource("/fxml/lobby.fxml");
-
     private final ScheduledExecutorService scheduler;
 
     @FXML
@@ -75,6 +73,12 @@ public class LobbyController {
     private String selectedOpponent, pendingChallenger;
 
     private ScheduledFuture<?> pollFuture;
+
+    public static final URL SCENE_FXML = LobbyController.class.getResource("/fxml/lobby.fxml");
+
+    public static final double SCENE_WIDTH = 1100.0;
+
+    public static final double SCENE_HEIGHT = 700.0;
 
     // ── Constructors ─────────────────────────────────────────────────────────────────────────────────────────────────
     public LobbyController() {
