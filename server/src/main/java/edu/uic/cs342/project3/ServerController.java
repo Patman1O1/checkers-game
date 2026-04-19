@@ -5,6 +5,8 @@ import edu.uic.cs342.project3.http.ServerThread;
 import edu.uic.cs342.project3.model.CheckersGame;
 import edu.uic.cs342.project3.util.PlayerRegistry;
 import javafx.application.Platform;
+import javafx.beans.Observable;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
@@ -12,52 +14,64 @@ import javafx.scene.control.ListView;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 
-/**
- * JavaFX controller for server.fxml – the server log GUI.
- */
 public class ServerController {
+    // ── Fields ───────────────────────────────────────────────────────────────────────────────────────────────────────
+    private final PlayerRegistry playerRegistry;
 
-    // ── Fields ────────────────────────────────────────────────────────────────
+    private final GameManager gameManager;
 
-    private static final DateTimeFormatter TIME_FMT = DateTimeFormatter.ofPattern("HH:mm:ss");
+    @FXML
+    private ListView<String> logList;
 
-    @FXML private ListView<String> logList;
-    @FXML private Label            statusLabel;
-    @FXML private Label            portLabel;
-    @FXML private Label            onlineLabel;
-    @FXML private Label            gamesLabel;
+    @FXML
+    private Label statusLabel;
 
-    // ── Methods ───────────────────────────────────────────────────────────────
+    @FXML
+    private Label portLabel;
+
+    @FXML
+    private Label onlineLabel;
+
+    @FXML
+    private Label gamesLabel;
+
+    // ── Constructors ─────────────────────────────────────────────────────────────────────────────────────────────────
+    public ServerController() {
+        this.playerRegistry = PlayerRegistry.getInstance();
+        this.gameManager = GameManager.getInstance();
+    }
+
+    // ── Methods ──────────────────────────────────────────────────────────────────────────────────────────────────────
+    @FXML
+    private void clearLog() { this.logList.getItems().clear(); }
+
+    @FXML
+    private void refreshStats() {
+        this.onlineLabel.setText(String.format("Online: %d", this.playerRegistry.getOnlineUsernames().size()));
+
+        long numActiveGames = 0;
+        for (CheckersGame game : this.gameManager.getAllGames()) {
+            if (game.getStatus() == CheckersGame.Status.ACTIVE) {
+                ++numActiveGames;
+            }
+        }
+        this.gamesLabel.setText(String.format("Active Games: %d", numActiveGames));
+    }
 
     @FXML
     public void initialize() {
-        portLabel.setText("Port: " + ServerThread.PORT);
-        statusLabel.setText("● Running");
-        statusLabel.setStyle("-fx-text-fill: #4ade80;");
-        refreshStats();
+        this.portLabel.setText(String.format("Port: %d", ServerThread.DEFAULT_PORT));
+        this.statusLabel.setText("● Running");
+        this.statusLabel.setStyle("-fx-text-fill: #4ade80;");
+        this.refreshStats();
     }
 
     public void appendLog(String message) {
         Platform.runLater(() -> {
-            String entry = "[" + LocalTime.now().format(TIME_FMT) + "] " + message;
-            logList.getItems().add(entry);
-            logList.scrollTo(logList.getItems().size() - 1);
-            refreshStats();
+            ObservableList<String> logListItems = this.logList.getItems();
+            logListItems.add(String.format("[%s] %s", LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss")), message));
+            this.logList.scrollTo(logListItems.size() - 1);
+            this.refreshStats();
         });
-    }
-
-    @FXML
-    private void clearLog() {
-        logList.getItems().clear();
-    }
-
-    @FXML
-    private void refreshStats() {
-        int  online = PlayerRegistry.getInstance().getOnlineUsernames().size();
-        long games  = GameManager.getInstance().getAllGames().stream()
-                .filter(g -> g.getStatus() == CheckersGame.Status.ACTIVE)
-                .count();
-        onlineLabel.setText("Online: " + online);
-        gamesLabel.setText("Active Games: " + games);
     }
 }

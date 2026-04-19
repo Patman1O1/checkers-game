@@ -2,68 +2,61 @@ package edu.uic.cs342.project3.http;
 
 import java.io.Serializable;
 
-/**
- * A serialisable response sent from server to client over
- * ObjectInputStream / ObjectOutputStream.
- *
- * sequenceId is copied from the matching HttpRequest so the client can route
- * the response to the correct pending callback.
- */
-public class HttpResponse implements Serializable {
-
-    // ── Fields ────────────────────────────────────────────────────────────────
-
+public final class HttpResponse implements Serializable {
+    // ── Fields ───────────────────────────────────────────────────────────────────────────────────────────────────────
     private static final long serialVersionUID = 1L;
 
-    private final long   sequenceId;
-    private final int    statusCode;
+    private final long sequenceId;
+
+    private final int statusCode;
+
     private final String body;
 
-    // ── Constructors ──────────────────────────────────────────────────────────
-
+    // ── Constructors ─────────────────────────────────────────────────────────────────────────────────────────────────
     private HttpResponse(long sequenceId, int statusCode, String body) {
         this.sequenceId = sequenceId;
         this.statusCode = statusCode;
-        this.body       = body;
+        this.body = body;
     }
 
-    // ── Getters ───────────────────────────────────────────────────────────────
+    // ── Getters ──────────────────────────────────────────────────────────────────────────────────────────────────────
+    public long getSequenceId() { return this.sequenceId; }
 
-    public long    getSequenceId() { return sequenceId; }
-    public int     getStatusCode() { return statusCode; }
-    public String  getBody()       { return body;       }
-    public boolean isOk()          { return statusCode < 400; }
+    public int getStatusCode() { return this.statusCode; }
 
-    // ── Methods ───────────────────────────────────────────────────────────────
+    public String getBody() { return this.body; }
 
-    public static HttpResponse ok(long seq, String json) {
-        return new HttpResponse(seq, 200, json);
-    }
+    public boolean isOk() { return this.statusCode < 400; }
 
-    public static HttpResponse badRequest(long seq, String message) {
-        return new HttpResponse(seq, 400, error(message));
-    }
-
-    public static HttpResponse notFound(long seq) {
-        return new HttpResponse(seq, 404, error("Not found"));
-    }
-
-    public static HttpResponse conflict(long seq, String message) {
-        return new HttpResponse(seq, 409, error(message));
-    }
-
-    public static HttpResponse unauthorized(long seq, String message) {
-        return new HttpResponse(seq, 401, error(message));
-    }
-
-    public static HttpResponse serverError(long seq, String message) {
-        return new HttpResponse(seq, 500, error(message));
+    // ── Methods ──────────────────────────────────────────────────────────────────────────────────────────────────────
+    private static String error(String message) {
+        return String.format("{\"error\":\"%s\"}", message.replace("\"", "'"));
     }
 
     @Override
-    public String toString() { return "[" + sequenceId + "] " + statusCode + " " + body; }
+    public String toString() { return String.format("[%d] %d %s", this.sequenceId, this.statusCode, this.body); }
 
-    private static String error(String msg) {
-        return "{\"error\":\"" + msg.replace("\"", "'") + "\"}";
+    public static HttpResponse ok(long sequenceId, String jsonString) {
+        return new HttpResponse(sequenceId, HttpStatusCodes.OK, jsonString);
+    }
+
+    public static HttpResponse badRequest(long sequenceId, String message) {
+        return new HttpResponse(sequenceId, HttpStatusCodes.BAD_REQUEST, HttpResponse.error(message));
+    }
+
+    public static HttpResponse notFound(long sequenceId) {
+        return new HttpResponse(sequenceId, HttpStatusCodes.NOT_FOUND, HttpResponse.error("Not found"));
+    }
+
+    public static HttpResponse conflict(long sequenceId, String message) {
+        return new HttpResponse(sequenceId, HttpStatusCodes.CONFLICT, HttpResponse.error(message));
+    }
+
+    public static HttpResponse unauthorized(long sequenceId, String message) {
+        return new HttpResponse(sequenceId, HttpStatusCodes.UNAUTHORIZED, HttpResponse.error(message));
+    }
+
+    public static HttpResponse serverError(long sequenceId, String message) {
+        return new HttpResponse(sequenceId, HttpStatusCodes.SERVER_ERROR, HttpResponse.error(message));
     }
 }

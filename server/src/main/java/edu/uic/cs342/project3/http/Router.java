@@ -7,6 +7,7 @@ import edu.uic.cs342.project3.model.CheckersGame;
 import edu.uic.cs342.project3.model.Player;
 import edu.uic.cs342.project3.util.JsonUtil;
 import edu.uic.cs342.project3.util.PlayerRegistry;
+
 import com.fasterxml.jackson.databind.JsonNode;
 
 import java.util.ArrayList;
@@ -16,91 +17,56 @@ import java.util.Map;
 import java.util.function.Consumer;
 import java.util.logging.Logger;
 
-/**
- * Routes every incoming request to the appropriate handler.
- * handle() is pure logic: receives an HttpRequest POJO, returns an HttpResponse POJO.
- * All stream I/O lives in ServerThread, not here.
- */
 public class Router {
+    // ── Fields ───────────────────────────────────────────────────────────────────────────────────────────────────────
+    private static final Logger LOGGER = Logger.getLogger(Router.class.getName());
 
-    // ── Fields ────────────────────────────────────────────────────────────────
+    private final Consumer<String> callback;
 
-    private static final Logger LOG = Logger.getLogger(Router.class.getName());
+    // ── Constructors ─────────────────────────────────────────────────────────────────────────────────────────────────
+    public Router(Consumer<String> callback) { this.callback = callback; }
 
-    private final Consumer<String> logger;
-
-    // ── Constructors ──────────────────────────────────────────────────────────
-
-    public Router(Consumer<String> logger) {
-        this.logger = logger;
+    // ── Methods ──────────────────────────────────────────────────────────────────────────────────────────────────────
+    private static String str(JsonNode node, String field) {
+        JsonNode n = node.get(field);
+        return (n != null && !n.isNull()) ? n.asText("").trim() : "";
     }
 
-    // ── Methods ───────────────────────────────────────────────────────────────
-
-    public HttpResponse handle(HttpRequest req) {
-        String method = req.getMethod();
-        String path   = req.getPath();
-        long   seq    = req.getSequenceId();
-
-        log("[" + method + "] " + path);
-
-        try {
-            if (path.equals("/auth/signup")          && method.equals("POST")) return signup(req, seq);
-            if (path.equals("/auth/login")           && method.equals("POST")) return login(req, seq);
-            if (path.equals("/auth/logout")          && method.equals("POST")) return logout(req, seq);
-
-            if (path.equals("/users/online")         && method.equals("GET"))  return onlineUsers(seq);
-            if (path.matches("/users/[^/]+/stats")) {
-                if (method.equals("GET"))  return getUserStats(path, seq);
-                if (method.equals("POST")) return updateStats(path, req, seq);
-            }
-
-            if (path.equals("/friends/add")          && method.equals("POST")) return addFriend(req, seq);
-            if (path.matches("/friends/[^/]+")       && method.equals("GET"))  return getFriends(path, seq);
-
-            if (path.equals("/game/create")          && method.equals("POST")) return createGame(req, seq);
-            if (path.matches("/game/[^/]+")          && method.equals("GET"))  return getGame(path, seq);
-            if (path.matches("/game/[^/]+/move")     && method.equals("POST")) return makeMove(path, req, seq);
-            if (path.matches("/game/[^/]+/chat")     && method.equals("POST")) return sendChat(path, req, seq);
-            if (path.matches("/game/[^/]+/end")      && method.equals("POST")) return endGame(path, req, seq);
-
-            if (path.equals("/logs")                 && method.equals("GET"))  return getLogs(seq);
-
-            return HttpResponse.notFound(seq);
-
-        } catch (Exception e) {
-            LOG.severe("Handler error: " + e.getMessage());
-            return HttpResponse.serverError(seq, e.getMessage() != null ? e.getMessage() : "Internal error");
-        }
+    private static Map<String, Object> statsMap(Player player) {
+        Map<String, Object> m = new HashMap<>();
+        m.put("wins",   player.getWins());
+        m.put("losses", player.getLosses());
+        m.put("draws",  player.getDraws());
+        return m;
     }
 
-    private HttpResponse signup(HttpRequest req, long seq) throws Exception {
-        JsonNode body     = parseBody(req);
-        String   username = str(body, "username");
-        String   password = str(body, "password");
+    private HttpResponse signup(HttpRequest request, long sequenceId) {
+        JsonNode body = this.parseBody(request);
+        String username = str(body, "username");
+        String password = str(body, "password");
 
         if (username.isBlank() || password.isBlank())
-            return HttpResponse.badRequest(seq, "Username and password are required.");
+            return HttpResponse.badRequest(sequenceId, "Username and password are required.");
         if (username.length() < 3 || username.length() > 20)
-            return HttpResponse.badRequest(seq, "Username must be 3-20 characters.");
+            return HttpResponse.badRequest(sequenceId, "Username must be 3-20 characters.");
         if (password.length() < 6)
-            return HttpResponse.badRequest(seq, "Password must be at least 6 characters.");
+            return HttpResponse.badRequest(sequenceId, "Password must be at least 6 characters.");
         if (PlayerRegistry.getInstance().usernameExists(username))
-            return HttpResponse.conflict(seq, "Username already taken.");
+            return HttpResponse.conflict(sequenceId, "Username already taken.");
 
         PlayerRegistry.getInstance().save(new Player(username, password));
-        log("New account registered: " + username);
-        return HttpResponse.ok(seq, "{\"success\":true,\"username\":\"" + username + "\"}");
+        this.log("New account registered: " + username);
+        return HttpResponse.ok(sequenceId, "{\"success\":true,\"username\":\"" + username + "\"}");
     }
 
-    private HttpResponse login(HttpRequest req, long seq) throws Exception {
-        JsonNode body     = parseBody(req);
+    private HttpResponse login(HttpRequest request, long sequenceId) {
+        JsonNode body     = parseBody(request);
         String   username = str(body, "username");
         String   password = str(body, "password");
 
         Player player = PlayerRegistry.getInstance().get(username);
         if (player == null || !player.checkPassword(password))
-            return HttpResponse.unauthorized(seq, "Invalid username or password.");
+            return HttpResponse.unauthorized(sequenceId, "Invalid username or password.");
 
         player.setStatus(Player.Status.ONLINE);
         PlayerRegistry.getInstance().setOnline(username);
@@ -110,69 +76,69 @@ public class Router {
         resp.put("success",  true);
         resp.put("username", player.getUsername());
         resp.put("stats",    statsMap(player));
-        return HttpResponse.ok(seq, JsonUtil.toJson(resp));
+        return HttpResponse.ok(sequenceId, JsonUtil.toJson(resp));
     }
 
-    private HttpResponse logout(HttpRequest req, long seq) throws Exception {
-        JsonNode body     = parseBody(req);
+    private HttpResponse logout(HttpRequest request, long sequenceId) {
+        JsonNode body     = parseBody(request);
         String   username = str(body, "username");
         PlayerRegistry.getInstance().setOffline(username);
         Player player = PlayerRegistry.getInstance().get(username);
         if (player != null) player.setStatus(Player.Status.OFFLINE);
         log("Logout: " + username);
-        return HttpResponse.ok(seq, "{\"success\":true}");
+        return HttpResponse.ok(sequenceId, "{\"success\":true}");
     }
 
-    private HttpResponse onlineUsers(long seq) throws Exception {
+    private HttpResponse onlineUsers(long sequenceId) {
         Map<String, Object> resp = new HashMap<>();
         resp.put("users", PlayerRegistry.getInstance().getOnlineUsernames());
-        return HttpResponse.ok(seq, JsonUtil.toJson(resp));
+        return HttpResponse.ok(sequenceId, JsonUtil.toJson(resp));
     }
 
-    private HttpResponse getUserStats(String path, long seq) throws Exception {
+    private HttpResponse getUserStats(String path, long sequenceId) {
         String username = path.split("/")[2];
         Player player   = PlayerRegistry.getInstance().get(username);
-        if (player == null) return HttpResponse.notFound(seq);
+        if (player == null) return HttpResponse.notFound(sequenceId);
         Map<String, Object> resp = new HashMap<>();
         resp.put("stats", statsMap(player));
-        return HttpResponse.ok(seq, JsonUtil.toJson(resp));
+        return HttpResponse.ok(sequenceId, JsonUtil.toJson(resp));
     }
 
-    private HttpResponse updateStats(String path, HttpRequest req, long seq) throws Exception {
+    private HttpResponse updateStats(String path, HttpRequest request, long sequenceId) {
         String   username = path.split("/")[2];
-        JsonNode body     = parseBody(req);
+        JsonNode body     = parseBody(request);
         String   result   = str(body, "result");
         Player   player   = PlayerRegistry.getInstance().get(username);
-        if (player == null) return HttpResponse.notFound(seq);
+        if (player == null) return HttpResponse.notFound(sequenceId);
         switch (result) {
             case "win"  -> player.addWin();
             case "loss" -> player.addLoss();
             case "draw" -> player.addDraw();
         }
         PlayerRegistry.getInstance().save(player);
-        return HttpResponse.ok(seq, "{\"success\":true}");
+        return HttpResponse.ok(sequenceId, "{\"success\":true}");
     }
 
-    private HttpResponse addFriend(HttpRequest req, long seq) throws Exception {
-        JsonNode body       = parseBody(req);
+    private HttpResponse addFriend(HttpRequest request, long sequenceId) {
+        JsonNode body       = parseBody(request);
         String   username   = str(body, "username");
         String   friendName = str(body, "friendUsername");
         Player   player     = PlayerRegistry.getInstance().get(username);
         Player   friend     = PlayerRegistry.getInstance().get(friendName);
-        if (player == null) return HttpResponse.notFound(seq);
-        if (friend == null) return HttpResponse.badRequest(seq, "User '" + friendName + "' not found.");
+        if (player == null) return HttpResponse.notFound(sequenceId);
+        if (friend == null) return HttpResponse.badRequest(sequenceId, "User '" + friendName + "' not found.");
         if (username.equalsIgnoreCase(friendName))
-            return HttpResponse.badRequest(seq, "You cannot add yourself.");
+            return HttpResponse.badRequest(sequenceId, "You cannot add yourself.");
         player.addFriend(friend.getUsername());
         PlayerRegistry.getInstance().save(player);
         log(username + " added friend: " + friendName);
-        return HttpResponse.ok(seq, "{\"success\":true}");
+        return HttpResponse.ok(sequenceId, "{\"success\":true}");
     }
 
-    private HttpResponse getFriends(String path, long seq) throws Exception {
+    private HttpResponse getFriends(String path, long sequenceId) {
         String username = path.split("/")[2];
         Player player   = PlayerRegistry.getInstance().get(username);
-        if (player == null) return HttpResponse.notFound(seq);
+        if (player == null) return HttpResponse.notFound(sequenceId);
 
         List<Map<String, Object>> list = new ArrayList<>();
         for (String f : player.getFriends()) {
@@ -186,37 +152,37 @@ public class Router {
         }
         Map<String, Object> resp = new HashMap<>();
         resp.put("friends", list);
-        return HttpResponse.ok(seq, JsonUtil.toJson(resp));
+        return HttpResponse.ok(sequenceId, JsonUtil.toJson(resp));
     }
 
-    private HttpResponse createGame(HttpRequest req, long seq) throws Exception {
-        JsonNode body    = parseBody(req);
+    private HttpResponse createGame(HttpRequest request, long sequenceId) {
+        JsonNode body    = parseBody(request);
         String   player1 = str(body, "player1");
         boolean  vsAI    = body.has("vsAI") && body.get("vsAI").asBoolean();
         String   player2 = vsAI ? "AI" : str(body, "player2");
-        if (player1.isBlank()) return HttpResponse.badRequest(seq, "player1 required.");
+        if (player1.isBlank()) return HttpResponse.badRequest(sequenceId, "player1 required.");
         CheckersGame game = GameManager.getInstance().createGame(player1, player2, vsAI);
         log("Game created: " + game.getId() + " (" + player1 + " vs " + game.getPlayer2() + ")");
         Map<String, Object> resp = new HashMap<>();
         resp.put("gameId", game.getId());
-        return HttpResponse.ok(seq, JsonUtil.toJson(resp));
+        return HttpResponse.ok(sequenceId, JsonUtil.toJson(resp));
     }
 
-    private HttpResponse getGame(String path, long seq) throws Exception {
+    private HttpResponse getGame(String path, long sequenceId) {
         String       id   = path.split("/")[2];
         CheckersGame game = GameManager.getInstance().getGame(id);
-        if (game == null) return HttpResponse.notFound(seq);
+        if (game == null) return HttpResponse.notFound(sequenceId);
         Map<String, Object> resp = new HashMap<>();
         resp.put("gameState", game);
-        return HttpResponse.ok(seq, JsonUtil.toJson(resp));
+        return HttpResponse.ok(sequenceId, JsonUtil.toJson(resp));
     }
 
-    private HttpResponse makeMove(String path, HttpRequest req, long seq) throws Exception {
+    private HttpResponse makeMove(String path, HttpRequest request, long sequenceId) {
         String       id   = path.split("/")[2];
         CheckersGame game = GameManager.getInstance().getGame(id);
-        if (game == null) return HttpResponse.notFound(seq);
+        if (game == null) return HttpResponse.notFound(sequenceId);
 
-        JsonNode body   = parseBody(req);
+        JsonNode body   = parseBody(request);
         String   player = str(body, "player");
         JsonNode fromN  = body.get("from");
         JsonNode toN    = body.get("to");
@@ -235,63 +201,50 @@ public class Router {
             }
         }
 
-        if (error != null) return HttpResponse.badRequest(seq, error);
+        if (error != null) return HttpResponse.badRequest(sequenceId, error);
 
         if (game.getStatus() == CheckersGame.Status.COMPLETED) {
             updateStatsForGame(game);
             log("Game " + id + " ended. Winner: " + game.getWinner());
         }
-        return HttpResponse.ok(seq, "{\"success\":true}");
+        return HttpResponse.ok(sequenceId, "{\"success\":true}");
     }
 
-    private HttpResponse sendChat(String path, HttpRequest req, long seq) throws Exception {
+    private HttpResponse sendChat(String path, HttpRequest request, long sequenceId) {
         String       id      = path.split("/")[2];
         CheckersGame game    = GameManager.getInstance().getGame(id);
-        if (game == null) return HttpResponse.notFound(seq);
-        JsonNode body    = parseBody(req);
+        if (game == null) return HttpResponse.notFound(sequenceId);
+        JsonNode body    = parseBody(request);
         String   player  = str(body, "player");
         String   message = str(body, "message");
-        if (message.isBlank()) return HttpResponse.badRequest(seq, "Message cannot be blank.");
+        if (message.isBlank()) return HttpResponse.badRequest(sequenceId, "Message cannot be blank.");
         game.addChat(player, message);
-        return HttpResponse.ok(seq, "{\"success\":true}");
+        return HttpResponse.ok(sequenceId, "{\"success\":true}");
     }
 
-    private HttpResponse endGame(String path, HttpRequest req, long seq) throws Exception {
+    private HttpResponse endGame(String path, HttpRequest request, long sequenceId) {
         String       id   = path.split("/")[2];
         CheckersGame game = GameManager.getInstance().getGame(id);
-        if (game == null) return HttpResponse.notFound(seq);
-        String winner = str(parseBody(req), "winner");
+        if (game == null) return HttpResponse.notFound(sequenceId);
+        String winner = str(parseBody(request), "winner");
         game.endGame(winner);
         updateStatsForGame(game);
         log("Game " + id + " force-ended. Winner: " + winner);
-        return HttpResponse.ok(seq, "{\"success\":true}");
+        return HttpResponse.ok(sequenceId, "{\"success\":true}");
     }
 
-    private HttpResponse getLogs(long seq) throws Exception {
+    private HttpResponse getLogs(long sequenceId) {
         Map<String, Object> resp = new HashMap<>();
         resp.put("onlineCount", PlayerRegistry.getInstance().getOnlineUsernames().size());
         resp.put("gameCount",   GameManager.getInstance().getAllGames().size());
-        return HttpResponse.ok(seq, JsonUtil.toJson(resp));
+        return HttpResponse.ok(sequenceId, JsonUtil.toJson(resp));
     }
 
-    private JsonNode parseBody(HttpRequest req) throws Exception {
-        String body = req.getBody();
+    private JsonNode parseBody(HttpRequest request) {
+        String body = request.getBody();
         if (body == null || body.isBlank()) return JsonUtil.getMapper().createObjectNode();
         try { return JsonUtil.getMapper().readTree(body); }
         catch (Exception e) { return JsonUtil.getMapper().createObjectNode(); }
-    }
-
-    private static String str(JsonNode node, String field) {
-        JsonNode n = node.get(field);
-        return (n != null && !n.isNull()) ? n.asText("").trim() : "";
-    }
-
-    private static Map<String, Object> statsMap(Player player) {
-        Map<String, Object> m = new HashMap<>();
-        m.put("wins",   player.getWins());
-        m.put("losses", player.getLosses());
-        m.put("draws",  player.getDraws());
-        return m;
     }
 
     private void updateStatsForGame(CheckersGame game) {
@@ -301,20 +254,94 @@ public class Router {
         Player p2 = game.isVsAI() ? null : PlayerRegistry.getInstance().get(game.getPlayer2());
         if (p1 != null) {
             if (winner.equals("draw"))     p1.addDraw();
-            else if (winner.equals(Color.RED.getValue())) p1.addWin();
+            else if (winner.equals(Color.RED.getName())) p1.addWin();
             else                           p1.addLoss();
             PlayerRegistry.getInstance().save(p1);
         }
         if (p2 != null) {
             if (winner.equals("draw"))       p2.addDraw();
-            else if (winner.equals(Color.BLACK.getValue())) p2.addWin();
+            else if (winner.equals(Color.BLACK.getName())) p2.addWin();
             else                             p2.addLoss();
             PlayerRegistry.getInstance().save(p2);
         }
     }
 
-    private void log(String msg) {
-        LOG.info(msg);
-        if (logger != null) logger.accept(msg);
+    private void log(String message) {
+        Router.LOGGER.info(message);
+        if (callback != null) callback.accept(message);
     }
+
+    public HttpResponse handleRequest(HttpRequest request) {
+        HttpMethod method = request.getMethod();
+        String path = request.getPath();
+        long sequenceId = request.getSequenceId();
+
+        this.log(String.format("[%s] %s", method.toString(), path));
+
+        try {
+            if (path.equals("/auth/signup") && method == HttpMethod.POST) {
+                return this.signup(request, sequenceId);
+            }
+
+            if (path.equals("/auth/login") && method == HttpMethod.POST) {
+                return this.login(request, sequenceId);
+            }
+
+            if (path.equals("/auth/logout") && method == HttpMethod.POST) {
+                return this.logout(request, sequenceId);
+            }
+
+            if (path.equals("/users/online") && method == HttpMethod.GET) {
+                return this.onlineUsers(sequenceId);
+            }
+
+            if (path.matches("/users/[^/]+/stats")) {
+                if (method == HttpMethod.GET) {
+                    return this.getUserStats(path, sequenceId);
+                }
+
+                if (method == HttpMethod.POST) {
+                    return this.updateStats(path, request, sequenceId);
+                }
+            }
+
+            if (path.equals("/friends/add") && method == HttpMethod.POST) {
+                return this.addFriend(request, sequenceId);
+            }
+
+            if (path.matches("/friends/[^/]+") && method == HttpMethod.GET) {
+                return this.getFriends(path, sequenceId);
+            }
+
+            if (path.equals("/game/create") && method == HttpMethod.POST) {
+                return this.createGame(request, sequenceId);
+            }
+
+            if (path.matches("/game/[^/]+") && method == HttpMethod.GET) {
+                return this.getGame(path, sequenceId);
+            }
+
+            if (path.matches("/game/[^/]+/move") && method == HttpMethod.POST) {
+                return this.makeMove(path, request, sequenceId);
+            }
+            if (path.matches("/game/[^/]+/chat") && method == HttpMethod.POST) {
+                return this.sendChat(path, request, sequenceId);
+            }
+
+            if (path.matches("/game/[^/]+/end") && method == HttpMethod.POST) {
+                return this.endGame(path, request, sequenceId);
+            }
+
+            if (path.equals("/logs") && method == HttpMethod.GET) {
+                return this.getLogs(sequenceId);
+            }
+
+            return HttpResponse.notFound(sequenceId);
+
+        } catch (Exception e) {
+            LOGGER.severe("Handler error: " + e.getMessage());
+            return HttpResponse.serverError(sequenceId, e.getMessage() != null ? e.getMessage() : "Internal error");
+        }
+    }
+
 }

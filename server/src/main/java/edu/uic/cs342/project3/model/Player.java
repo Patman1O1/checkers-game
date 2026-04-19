@@ -2,22 +2,25 @@ package edu.uic.cs342.project3.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import edu.uic.cs342.project3.json.deserializers.PlayerDeserializer;
+import edu.uic.cs342.project3.json.serializers.PlayerSerializer;
 
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Represents a registered player with persistent stats and friends list.
- */
 @JsonIgnoreProperties(ignoreUnknown = true)
+@JsonSerialize(using = PlayerSerializer.class)
+@JsonDeserialize(using = PlayerDeserializer.class)
 public class Player {
+    // ── Status ───────────────────────────────────────────────────────────────────────────────────────────────────────
+    public static enum Status {
+        // ── Constants ────────────────────────────────────────────────────────────────────────────────────────────────
+        ONLINE, OFFLINE;
+    }
 
-    // ── Subclasses / Subenums ─────────────────────────────────────────────────
-
-    public enum Status { ONLINE, OFFLINE }
-
-    // ── Fields ────────────────────────────────────────────────────────────────
-
+    // ── Fields ───────────────────────────────────────────────────────────────────────────────────────────────────────
     @JsonProperty("username")
     private String username;
 
@@ -38,7 +41,7 @@ public class Player {
 
     private transient Status status = Status.OFFLINE;
 
-    // ── Constructors ──────────────────────────────────────────────────────────
+    // ── Constructors ─────────────────────────────────────────────────────────────────────────────────────────────────
 
     public Player() {
         this.friends = new ArrayList<>();
@@ -54,15 +57,14 @@ public class Player {
         this.status   = Status.OFFLINE;
     }
 
-    // ── Setters ───────────────────────────────────────────────────────────────
+    // ── Setters ──────────────────────────────────────────────────────────────────────────────────────────────────────
 
     public void setStatus(Status s)  { this.status = s; }
     public void setWins(int w)       { this.wins   = w; }
     public void setLosses(int l)     { this.losses = l; }
     public void setDraws(int d)      { this.draws  = d; }
 
-    // ── Getters ───────────────────────────────────────────────────────────────
-
+    // ── Getters ──────────────────────────────────────────────────────────────────────────────────────────────────────
     public String       getUsername() { return username; }
     public String       getPassword() { return password; }
     public int          getWins()     { return wins;     }
@@ -71,7 +73,7 @@ public class Player {
     public List<String> getFriends()  { return friends;  }
     public Status       getStatus()   { return status;   }
 
-    // ── Methods ───────────────────────────────────────────────────────────────
+    // ── Methods ──────────────────────────────────────────────────────────────────────────────────────────────────────
 
     public void addWin()  { wins++;   }
     public void addLoss() { losses++; }

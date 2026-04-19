@@ -71,7 +71,7 @@ public class Board {
     private static final Color AI_COLOR     = Color.BLACK;
     private static final Color PLAYER_COLOR = Color.RED;
 
-    @JsonProperty("board")
+    @JsonProperty("grid")
     private Piece[][] grid;
 
     // ── Constructors ──────────────────────────────────────────────────────────
@@ -115,8 +115,15 @@ public class Board {
             return "It is not your turn.";
 
         List<Move> valid = validMoves(playerColor);
-        if (valid.stream().noneMatch(m -> m.from().equals(from) && m.to().equals(to)))
+        if (valid.stream().noneMatch(m -> m.from().equals(from) && m.to().equals(to))) {
+            System.out.printf("Current Position: (%d, %d)\nRequested Position: (%d, %d)\n", from.row, from.col, to.row, to.col);
+            int i = 1;
+            for (Move validMove : valid) {
+                System.out.printf("Valid Move %d: (%d, %d)\n", i, validMove.to.row, validMove.to.col);
+                ++i;
+            }
             return "Invalid move.";
+        }
 
         executeMove(grid, from, to, piece);
         return null;
@@ -168,7 +175,7 @@ public class Board {
     }
 
     private static List<Move> getAllValidMoves(Piece[][] b, Color color) {
-        List<Move> jumps   = new ArrayList<>();
+        List<Move> jumps = new ArrayList<>();
         List<Move> regular = new ArrayList<>();
 
         for (int r = 0; r < 8; r++) {
@@ -227,15 +234,15 @@ public class Board {
                     if (p.getColor() == Color.BLACK) hasBlack = true;
                 }
 
-        if (!hasRed)   return Color.BLACK.getValue();
-        if (!hasBlack) return Color.RED.getValue();
+        if (!hasRed)   return Color.BLACK.getName();
+        if (!hasBlack) return Color.RED.getName();
 
         boolean redCanMove   = !getAllValidMoves(b, Color.RED).isEmpty();
         boolean blackCanMove = !getAllValidMoves(b, Color.BLACK).isEmpty();
 
         if (!redCanMove && !blackCanMove) return "draw";
-        if (!redCanMove)   return Color.BLACK.getValue();
-        if (!blackCanMove) return Color.RED.getValue();
+        if (!redCanMove)   return Color.BLACK.getName();
+        if (!blackCanMove) return Color.RED.getName();
         return null;
     }
 

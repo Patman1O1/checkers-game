@@ -1,124 +1,156 @@
 package edu.uic.cs342.project3.http;
 
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
+import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-/**
- * Modelled after ServerThread from the HW5 starter code.
- * Outer thread accepts connections; inner ClientThread handles each client.
- */
 public class ServerThread extends Thread {
-
-    // ── Subclasses ────────────────────────────────────────────────────────────
-
+    // ── Client Thread ────────────────────────────────────────────────────────────────────────────────────────────────
     private static class ClientThread extends Thread {
+        // ── Fields ───────────────────────────────────────────────────────────────────────────────────────────────────
+        private final ServerThread serverThread;
 
-        // ── Fields ────────────────────────────────────────────────────────────
+        private final Socket socket;
 
-        private final ServerThread server;
-        private final Socket       socket;
-        private final int          id;
+        private final int id;
 
         private ObjectOutputStream outputStream;
-        private ObjectInputStream  inputStream;
 
-        // ── Constructors ──────────────────────────────────────────────────────
+        private ObjectInputStream inputStream;
 
-        private ClientThread(ServerThread server, Socket socket, int id) {
-            this.server = server;
+        // ── Constructors ─────────────────────────────────────────────────────────────────────────────────────────────
+        private ClientThread(ServerThread serverThread, Socket socket, int id) {
+            this.serverThread = serverThread;
             this.socket = socket;
-            this.id     = id;
-            setDaemon(true);
-            setName("client-" + id);
+            this.id = id;
+
+            // Make this thread terminate if all other threads have terminated
+            super.setDaemon(true);
+
+            // Set the name of the thread
+            super.setName(String.format("client-#%d", id));
         }
 
-        // ── Methods ───────────────────────────────────────────────────────────
-
+        // ── Methods ──────────────────────────────────────────────────────────────────────────────────────────────────
         private void send(HttpResponse response) {
             try {
                 this.outputStream.writeObject(response);
                 this.outputStream.flush();
-            } catch (Exception e) {
-                server.log("Failed to send response to client #" + id + ": " + e.getMessage());
+            } catch (IOException exception) {
+                String message = String.format("Failed to send response to client #%d: %s", this.id, exception.getMessage());
+                ServerThread.LOGGER.log(Level.SEVERE, message, exception);
             }
         }
 
         @Override
         public void run() {
             try {
+                // Set up the output stream to the client
                 this.outputStream = new ObjectOutputStream(this.socket.getOutputStream());
                 this.outputStream.flush();
+
+                // Set up the input stream from the client
                 this.inputStream  = new ObjectInputStream(this.socket.getInputStream());
+
                 this.socket.setTcpNoDelay(true);
-            } catch (IOException e) {
-                server.log("Could not open streams for client #" + id + ": " + e.getMessage());
-                LOGGER.log(Level.SEVERE, e.getMessage(), e);
+            } catch (IOException exception) {
+                // Let the calling thread know that I/O streams could not be opened for the client
+                this.serverThread.callback.accept(String.format(
+                        "Failed to open streams for client #%d because %s was thrown with description \"%s\"",
+                        this.id, exception.getClass().getName(), exception.getMessage()
+                ));
+
+                // Print the callstack and the exception's type and description to the terminal
+                ServerThread.LOGGER.log(Level.SEVERE, exception.getMessage(), exception);
                 return;
             }
 
+            // While the client thread does not receive an interrupt signal...
             while (!Thread.currentThread().isInterrupted()) {
                 try {
-                    HttpRequest  req = (HttpRequest) this.inputStream.readObject();
-                    HttpResponse res = server.router.handle(req);
-                    this.send(res);
-                } catch (Exception e) {
-                    LOGGER.log(Level.INFO, "Client #" + id + " disconnected: " + e.getMessage(), e);
+                    // Read the request send by the client
+                    HttpRequest request = (HttpRequest) this.inputStream.readObject();
+
+                    // Send the request to the HTTP router to be processed
+                    HttpResponse response = this.serverThread.router.handleRequest(request);
+
+                    // Send the router's response to the client
+                    this.send(response);
+                } catch (EOFException exception) {
+                    // Let the server know the client has disconnected
+                    ServerThread.LOGGER.log(Level.INFO, String.format("Client #%d disconnected", this.id));
+                    break;
+                } catch (Exception exception) {
+                    // Print the callstack and the exception's type and description to the terminal
+                    ServerThread.LOGGER.log(Level.SEVERE, exception.getMessage(), exception);
                     break;
                 }
             }
 
-            try { this.socket.close(); } catch (IOException ignored) {}
+            try {
+                // Close the connection to the client's socket
+                this.socket.close();
+            } catch (IOException ignored) {
+                // Ignore
+            }
         }
     }
 
-    // ── Fields ────────────────────────────────────────────────────────────────
-
+    // ── Fields ───────────────────────────────────────────────────────────────────────────────────────────────────────
     private static final Logger LOGGER = Logger.getLogger(ServerThread.class.getName());
-    public  static final int    PORT   = 8080;
 
-    private final Router           router;
-    private final Consumer<String> logCallback;
-    private int                    clientCount = 0;
+    public static final int DEFAULT_PORT = 8080;
 
-    // ── Constructors ──────────────────────────────────────────────────────────
+    private final Router router;
 
-    public ServerThread(Consumer<String> logCallback) {
-        this.logCallback = logCallback;
-        this.router      = new Router(logCallback);
-        setDaemon(true);
-        setName("ServerThread");
+    private final Consumer<String> callback;
+
+    private int clientCount = 0;
+
+    // ── Constructors ─────────────────────────────────────────────────────────────────────────────────────────────────
+    public ServerThread(Consumer<String> callback) throws NullPointerException {
+        if (callback == null) {
+            throw new NullPointerException("callback is null");
+        }
+
+        this.callback = callback;
+        this.router = new Router(callback);
+
+        // Make this thread terminate when all other threads have terminated
+        super.setDaemon(true);
+
+        // Set the name of the thread
+        super.setName("server");
     }
 
-    // ── Methods ───────────────────────────────────────────────────────────────
-
-    public void stopServer() {
-        interrupt();
-    }
-
+    // ── Methods ──────────────────────────────────────────────────────────────────────────────────────────────────────
     @Override
     public void run() {
-        try (ServerSocket serverSocket = new ServerSocket(PORT)) {
-            log("Server listening on port " + PORT);
+        try (ServerSocket serverSocket = new ServerSocket(ServerThread.DEFAULT_PORT)) {
+            // Let the calling thread know the server has been started and is listening on the default port number
+            this.callback.accept(String.format("Server listening on port %d", ServerThread.DEFAULT_PORT));
+
+            // Send a message to stdout indicating the server has been started and is listening on the default port number
+            ServerThread.LOGGER.log(Level.INFO, String.format("Server listening on port %d", ServerThread.DEFAULT_PORT));
+
+            // While the server thread does receive an interrupt signal...
             while (!Thread.currentThread().isInterrupted()) {
-                ClientThread clientThread =
-                        new ClientThread(this, serverSocket.accept(), ++clientCount);
+                // Accept the client's connection request and spin up a new thread to handle their request
+                ClientThread clientThread = new ClientThread(this, serverSocket.accept(), ++this.clientCount);
                 clientThread.start();
             }
-        } catch (Exception e) {
-            if (!Thread.currentThread().isInterrupted())
-                log("Server socket failed: " + e.getMessage());
-            LOGGER.log(Level.SEVERE, e.getMessage(), e);
-        }
-    }
+        } catch (IOException exception) {
+            // If the server thread has not received an interrupt signal...
+            if (!Thread.currentThread().isInterrupted()) {
+                // Let the calling thread know that the server thread failed
+                this.callback.accept(String.format("Server socket failed because %s was thrown with description \"%s\"", exception.getClass().getName(), exception.getMessage()));
+            }
 
-    private void log(String message) {
-        LOGGER.info(message);
-        if (logCallback != null) logCallback.accept(message);
+            // Print the callstack and the exception's type and description to the terminal
+            ServerThread.LOGGER.log(Level.SEVERE, exception.getMessage(), exception);
+        }
     }
 }

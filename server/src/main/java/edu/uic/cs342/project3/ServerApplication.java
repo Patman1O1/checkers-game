@@ -1,54 +1,63 @@
 package edu.uic.cs342.project3;
 
 import edu.uic.cs342.project3.http.ServerThread;
+
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
+import java.net.URL;
+import java.util.Objects;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
-/**
- * Entry point for the Checkers Server application.
- * Starts the HTTP server on a background thread, then shows the log GUI.
- */
 public class ServerApplication extends Application {
+    // ── Fields ───────────────────────────────────────────────────────────────────────────────────────────────────────
+    private static final Logger LOGGER = Logger.getLogger(ServerApplication.class.getName());
 
-    // ── Fields ────────────────────────────────────────────────────────────────
+    private static final URL FXML_URL = ServerApplication.class.getResource("/fxml/server.fxml");
 
-    private static final Logger LOG = Logger.getLogger(ServerApplication.class.getName());
+    private static final URL CSS_URL = Objects.requireNonNull(ServerApplication.class.getResource("/css/server.css"));
 
-    private ServerThread httpServer;
+    private static final int DEFAULT_SCENE_WIDTH = 820;
 
-    // ── Methods ───────────────────────────────────────────────────────────────
+    private static final int DEFAULT_SCENE_HEIGHT = 560;
 
-    public static void main(String[] args) {
-        launch(args);
-    }
+    private ServerThread serverThread;
+
+    // ── Methods ──────────────────────────────────────────────────────────────────────────────────────────────────────
+    public static void main(String[] args) { Application.launch(args); }
 
     @Override
-    public void start(Stage primaryStage) throws Exception {
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/server.fxml"));
-        Parent root = loader.load();
-        ServerController controller = loader.getController();
+    public void start(Stage primaryStage) {
+        try {
+            FXMLLoader loader = new FXMLLoader(ServerApplication.FXML_URL);
+            Parent root = loader.load();
+            ServerController controller = loader.getController();
 
-        httpServer = new ServerThread(controller::appendLog);
-        httpServer.start();
+            this.serverThread = new ServerThread(controller::appendLog);
+            this.serverThread.start();
 
-        controller.appendLog("Checkers Server started on port " + ServerThread.PORT);
+            controller.appendLog("Checkers Server started on port " + ServerThread.DEFAULT_PORT);
 
-        Scene scene = new Scene(root, 820, 560);
-        scene.getStylesheets().add(getClass().getResource("/css/server.css").toExternalForm());
+            Scene scene = new Scene(root, ServerApplication.DEFAULT_SCENE_WIDTH, ServerApplication.DEFAULT_SCENE_HEIGHT);
+            scene.getStylesheets().add(ServerApplication.CSS_URL.toExternalForm());
 
-        primaryStage.setTitle("Checkers Server");
-        primaryStage.setScene(scene);
-        primaryStage.setOnCloseRequest(e -> httpServer.stopServer());
-        primaryStage.show();
+            primaryStage.setTitle("Checkers Server");
+            primaryStage.setScene(scene);
+            primaryStage.setOnCloseRequest(event -> this.serverThread.interrupt());
+            primaryStage.show();
+        } catch (Exception exception) {
+            ServerApplication.LOGGER.log(Level.SEVERE, exception.getMessage(), exception);
+        }
     }
 
     @Override
     public void stop() {
-        if (httpServer != null) httpServer.stopServer();
+        if (this.serverThread != null) {
+            this.serverThread.interrupt();
+        }
     }
 }

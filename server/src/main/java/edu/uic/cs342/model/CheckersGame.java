@@ -1,4 +1,4 @@
-package edu.uic.cs342.project3.model;
+package edu.uic.cs342.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -7,20 +7,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-/**
- * Represents a checkers game between two players (or a player vs the AI).
- *
- * Owns game identity, player names, turn state, status, and the chat log.
- * All board logic (piece movement, move validation, win detection, AI) is
- * delegated to the {@link Board} field.
- */
 public class CheckersGame {
 
     // ── Subenums / Subclasses ─────────────────────────────────────────────────
 
     public enum Status { WAITING, ACTIVE, COMPLETED }
 
-    /** An in-game chat message. */
     public static class ChatEntry {
 
         // ── Fields ────────────────────────────────────────────────────────────
@@ -61,12 +53,11 @@ public class CheckersGame {
         this.vsAI        = vsAI;
         this.board       = new Board();
         this.currentTurn = Color.RED;
-        this.status      = Status.ACTIVE;
+        this.status      = CheckersGame.Status.ACTIVE;
         this.winner      = null;
         this.chat        = new ArrayList<>();
     }
 
-    /** No-arg constructor for Jackson. */
     public CheckersGame() {
         this.id      = UUID.randomUUID().toString();
         this.player1 = "";
@@ -76,75 +67,61 @@ public class CheckersGame {
 
     // ── Setters ───────────────────────────────────────────────────────────────
 
-    public void setPlayer2(String p)      { this.player2     = p; }
-    public void setCurrentTurn(Color t)   { this.currentTurn = t; }
-    public void setStatus(Status s)       { this.status      = s; }
-    public void setWinner(String w)       { this.winner      = w; }
+    public void setPlayer2(String p)    { this.player2     = p; }
+    public void setCurrentTurn(Color t) { this.currentTurn = t; }
+    public void setStatus(Status s)     { this.status      = s; }
+    public void setWinner(String w)     { this.winner      = w; }
 
     // ── Getters ───────────────────────────────────────────────────────────────
 
-    public String          getId()          { return id;          }
-    public String          getPlayer1()     { return player1;     }
-    public String          getPlayer2()     { return player2;     }
-    public boolean         isVsAI()         { return vsAI;        }
-    public Board           getBoard()       { return board;       }
-    public Color           getCurrentTurn() { return currentTurn; }
-    public Status          getStatus()      { return status;      }
-    public String          getWinner()      { return winner;      }
-    public List<ChatEntry> getChat()        { return chat;        }
+    public String          getId()          { return this.id;          }
+    public String          getPlayer1()     { return this.player1;     }
+    public String          getPlayer2()     { return this.player2;     }
+    public boolean         isVsAI()         { return this.vsAI;        }
+    public Board           getBoard()       { return this.board;       }
+    public Color           getCurrentTurn() { return this.currentTurn; }
+    public Status          getStatus()      { return this.status;      }
+    public String          getWinner()      { return this.winner;      }
+    public List<ChatEntry> getChat()        { return this.chat;        }
 
     // ── Methods ───────────────────────────────────────────────────────────────
 
     public void addChat(String player, String message) {
-        chat.add(new ChatEntry(player, message));
+        this.chat.add(new CheckersGame.ChatEntry(player, message));
     }
 
     public void flipTurn() {
-        this.currentTurn = this.currentTurn == Color.RED ? Color.BLACK : Color.RED;
+        this.currentTurn = this.currentTurn.opposite();
     }
 
     public void endGame(String outcome) {
         this.winner = outcome;
-        this.status = Status.COMPLETED;
+        this.status = CheckersGame.Status.COMPLETED;
     }
 
     public boolean hasPlayer(String username) {
-        return player1.equalsIgnoreCase(username) || player2.equalsIgnoreCase(username);
+        return this.player1.equalsIgnoreCase(username) || this.player2.equalsIgnoreCase(username);
     }
 
-    /** Returns the Color assigned to the given username. */
     public Color colorOf(String username) {
-        return player1.equalsIgnoreCase(username) ? Color.RED : Color.BLACK;
+        return this.player1.equalsIgnoreCase(username) ? Color.RED : Color.BLACK;
     }
 
-    /**
-     * Validate and apply a player's move, then check for a win or draw.
-     * @return null on success, or a non-null error string on failure
-     */
-    public String applyMove(Board.Pos from, Board.Pos to, String playerUsername) {
-        Color  playerColor = colorOf(playerUsername);
-        String error       = board.applyMove(from, to, playerColor, currentTurn);
-        if (error != null) return error;
+    public String takeTurn(Opponent opponent, Board.Pos from, Board.Pos to) {
+        Color playerColor = this.colorOf(opponent.getName());
 
-        String outcome = board.checkOutcome();
-        if (outcome != null) endGame(outcome);
-        else                 flipTurn();
-
-        return null;
-    }
-
-    /**
-     * Compute and apply the best AI move.
-     * @return null on success, or a non-null error string on failure
-     */
-    public String applyAiMove() {
-        Board.Move best = board.bestAiMove();
-
-        if (best == null) {
-            endGame(Color.RED.getName());
+        if (opponent instanceof AiPlayer && this.board.validMoves(Color.BLACK).isEmpty()) {
+            this.endGame(Color.RED.getValue());
             return null;
         }
 
-        return applyMove(best.from(), best.to(), "AI");
+        String error = opponent.applyMove(this.board, playerColor, this.currentTurn, from, to);
+        if (error != null) return error;
+
+        String outcome = this.board.checkOutcome();
+        if (outcome != null) this.endGame(outcome);
+        else                 this.flipTurn();
+
+        return null;
     }
 }
