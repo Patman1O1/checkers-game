@@ -10,8 +10,12 @@ import javafx.scene.control.PasswordField;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.TextField;
 
+import java.net.URL;
+
 public class LoginController {
     // ── Fields ───────────────────────────────────────────────────────────────────────────────────────────────────────
+    private static final URL SCENE_FXML = LoginController.class.getResource("/fxml/login.fxml");
+
     @FXML
     private TabPane tabPane;
 
