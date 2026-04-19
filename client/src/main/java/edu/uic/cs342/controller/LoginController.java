@@ -14,8 +14,6 @@ import java.net.URL;
 
 public class LoginController {
     // ── Fields ───────────────────────────────────────────────────────────────────────────────────────────────────────
-    private static final URL SCENE_FXML = LoginController.class.getResource("/fxml/login.fxml");
-
     @FXML
     private TabPane tabPane;
 
@@ -52,6 +50,12 @@ public class LoginController {
     private SceneManager sceneManager;
 
     private ClientThread clientThread;
+
+    public static final URL SCENE_FXML = LoginController.class.getResource("/fxml/login.fxml");
+
+    public static final double SCENE_WIDTH = 1200.0;
+
+    public static final double SCENE_HEIGHT = 760.0;
 
     // ── Setters ──────────────────────────────────────────────────────────────────────────────────────────────────────
     public void setSceneManager(SceneManager sceneManager) { this.sceneManager = sceneManager; }
