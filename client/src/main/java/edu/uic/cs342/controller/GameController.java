@@ -29,7 +29,7 @@ import java.util.concurrent.TimeUnit;
 
 public class GameController {
     // ── Fields ───────────────────────────────────────────────────────────────────────────────────────────────────────
-    private static URL SCENE_FXML = GameController.class.getResource("/fxml/game.fxml");
+    private static final URL SCENE_FXML = GameController.class.getResource("/fxml/game.fxml");
 
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
