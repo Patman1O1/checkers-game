@@ -29,8 +29,6 @@ import java.util.concurrent.TimeUnit;
 
 public class GameController {
     // ── Fields ───────────────────────────────────────────────────────────────────────────────────────────────────────
-    private static final URL SCENE_FXML = GameController.class.getResource("/fxml/game.fxml");
-
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
     private final ScheduledExecutorService scheduler;
@@ -94,6 +92,12 @@ public class GameController {
     private int selectedRow = -1, selectedCol = -1;
 
     private ScheduledFuture<?> pollFuture;
+
+    public static final URL SCENE_FXML = GameController.class.getResource("/fxml/game.fxml");
+
+    public static double SCENE_WIDTH = 480.0;
+
+    public static double SCENE_HEIGHT = 560.0;
 
     // ── Constructors ─────────────────────────────────────────────────────────────────────────────────────────────────
     public GameController() {
