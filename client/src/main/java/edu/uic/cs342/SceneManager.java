@@ -4,111 +4,109 @@ import edu.uic.cs342.controller.GameController;
 import edu.uic.cs342.controller.LobbyController;
 import edu.uic.cs342.controller.LoginController;
 import edu.uic.cs342.http.ClientThread;
+
 import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
-import java.util.logging.Logger;
+import java.io.IOException;
+import java.util.Objects;
 
 public class SceneManager {
+    // ── Fields ───────────────────────────────────────────────────────────────────────────────────────────────────────
+    private static final String CSS = Objects.requireNonNull(
+            Objects.requireNonNull(SceneManager.class.getResource("/css/index.css")).toExternalForm()
+    );
 
-    // ── Fields ────────────────────────────────────────────────────────────────
+    private static SceneManager instance;
 
-    private static final Logger       LOG      = Logger.getLogger(SceneManager.class.getName());
-    private static       SceneManager instance;
+    private final Stage primaryStage;
 
-    private final Stage        stage;
-    private final ClientThread client;
-    private       Scene        loginScene;
-    private       Scene        lobbyScene;
-    private       Scene        gameScene;
+    private final ClientThread clientThread;
 
-    private FXMLLoader loginLoader;
-    private FXMLLoader lobbyLoader;
-    private FXMLLoader gameLoader;
+    private final Scene loginScene, lobbyScene, gameScene;
 
-    private String currentUsername;
-    private String currentGameId;
+    private final FXMLLoader loginLoader, lobbyLoader, gameLoader;
 
-    // ── Constructors ──────────────────────────────────────────────────────────
+    private String currentUsername, currentGameId;
 
-    private SceneManager(Stage stage, ClientThread client) throws Exception {
-        this.stage  = stage;
-        this.client = client;
-        this.preloadScenes();
+    // ── Constructors ─────────────────────────────────────────────────────────────────────────────────────────────────
+    private SceneManager(Stage primaryStage, ClientThread clientThread) throws IOException {
+        this.primaryStage = primaryStage;
+        this.clientThread = clientThread;
+
+        // Load the login scene
+        this.loginLoader = new FXMLLoader(LoginController.SCENE_FXML);
+        this.loginScene = new Scene(this.loginLoader.load(), LoginController.SCENE_WIDTH, LoginController.SCENE_HEIGHT);
+        this.loginScene.getStylesheets().add(SceneManager.CSS);
+
+        // Load the lobby scene
+        this.lobbyLoader = new FXMLLoader(LobbyController.SCENE_FXML);
+        this.lobbyScene = new Scene(this.lobbyLoader.load(), LobbyController.SCENE_WIDTH, LobbyController.SCENE_HEIGHT);
+        this.lobbyScene.getStylesheets().add(SceneManager.CSS);
+
+        // Load the game scene
+        this.gameLoader = new FXMLLoader(GameController.SCENE_FXML);
+        this.gameScene = new Scene(this.gameLoader.load(), GameController.SCENE_WIDTH, GameController.SCENE_HEIGHT);
+        this.gameScene.getStylesheets().add(SceneManager.CSS);
+
+        LoginController loginController = this.loginLoader.getController();
+        loginController.setSceneManager(this);
+        loginController.setClientThread(this.clientThread);
+
+        LobbyController lobbyController = this.lobbyLoader.getController();
+        lobbyController.setSceneManager(this);
+        lobbyController.setClientThread(this.clientThread);
+
+        GameController gameController = this.gameLoader.getController();
+        gameController.setSceneManager(this);
+        gameController.setClientThread(this.clientThread);
     }
 
-    // ── Getters ───────────────────────────────────────────────────────────────
-
-    public static SceneManager getInstance() {
-        if (SceneManager.instance == null)
+    // ── Getters ──────────────────────────────────────────────────────────────────────────────────────────────────────
+    public static SceneManager getInstance() throws IllegalStateException {
+        if (SceneManager.instance == null) {
             throw new IllegalStateException("SceneManager not yet initialised");
+        }
         return SceneManager.instance;
     }
 
     public String getCurrentUsername() { return this.currentUsername; }
-    public String getCurrentGameId()   { return this.currentGameId;   }
-    public Stage  getStage()           { return this.stage;           }
 
-    // ── Methods ───────────────────────────────────────────────────────────────
+    public String getCurrentGameId() { return this.currentGameId; }
 
-    public static SceneManager create(Stage stage, ClientThread client) throws Exception {
-        SceneManager sm = new SceneManager(stage, client);
-        SceneManager.instance = sm;
-        return sm;
+    public Stage getPrimaryStage() { return this.primaryStage; }
+
+    // ── Methods ──────────────────────────────────────────────────────────────────────────────────────────────────────
+    public static SceneManager create(Stage stage, ClientThread clientThread) throws Exception {
+        SceneManager sceneManager = new SceneManager(stage, clientThread);
+        SceneManager.instance = sceneManager;
+        return sceneManager;
     }
 
     public void showLogin() {
-        LoginController lc = this.loginLoader.getController();
-        lc.reset();
-        this.stage.setTitle("Checkers Online \u2013 Login");
-        this.stage.setScene(this.loginScene);
-        this.stage.show();
+        ((LoginController) this.loginLoader.getController()).reset();
+
+        this.primaryStage.setTitle("Checkers Online \u2013 Login");
+        this.primaryStage.setScene(this.loginScene);
+        this.primaryStage.show();
     }
 
     public void showLobby(String username) {
         this.currentUsername = username;
-        LobbyController lob = this.lobbyLoader.getController();
-        lob.onEnter();
-        this.stage.setTitle("Checkers Online \u2013 Lobby  [" + username + "]");
-        this.stage.setScene(this.lobbyScene);
+
+        ((LobbyController) this.lobbyLoader.getController()).onEnter();
+
+        this.primaryStage.setTitle(String.format("Checkers Online \u2013 Lobby  [%s]", username));
+        this.primaryStage.setScene(this.lobbyScene);
     }
 
     public void showGame(String gameId) {
         this.currentGameId = gameId;
-        GameController gc = this.gameLoader.getController();
-        gc.onEnter(gameId, this.currentUsername);
-        this.stage.setTitle("Checkers Online \u2013 Game");
-        this.stage.setScene(this.gameScene);
-    }
 
-    private void preloadScenes() throws Exception {
-        this.loginLoader = new FXMLLoader(this.getClass().getResource("/fxml/login.fxml"));
-        Parent loginRoot = this.loginLoader.load();
-        this.loginScene = new Scene(loginRoot, 480, 560);
-        this.loginScene.getStylesheets().add(this.css("dark-theme"));
+        ((GameController) this.gameLoader.getController()).onEnter(gameId, this.currentUsername);
 
-        this.lobbyLoader = new FXMLLoader(this.getClass().getResource("/fxml/lobby.fxml"));
-        Parent lobbyRoot = this.lobbyLoader.load();
-        this.lobbyScene = new Scene(lobbyRoot, 1100, 700);
-        this.lobbyScene.getStylesheets().add(this.css("dark-theme"));
-
-        this.gameLoader = new FXMLLoader(this.getClass().getResource("/fxml/game.fxml"));
-        Parent gameRoot = this.gameLoader.load();
-        this.gameScene = new Scene(gameRoot, 1200, 760);
-        this.gameScene.getStylesheets().add(this.css("dark-theme"));
-
-        LoginController lc  = this.loginLoader.getController();
-        LobbyController lob = this.lobbyLoader.getController();
-        GameController  gc  = this.gameLoader.getController();
-
-        lc.setSceneManager(this);  lc.setClientThread(this.client);
-        lob.setSceneManager(this); lob.setClientThread(this.client);
-        gc.setSceneManager(this);  gc.setClientThread(this.client);
-    }
-
-    private String css(String name) {
-        return this.getClass().getResource("/css/" + name + ".css").toExternalForm();
+        this.primaryStage.setTitle("Checkers Online \u2013 Game");
+        this.primaryStage.setScene(this.gameScene);
     }
 }
