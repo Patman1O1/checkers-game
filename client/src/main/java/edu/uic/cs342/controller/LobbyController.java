@@ -11,6 +11,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
 
+import java.net.URL;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -18,6 +19,8 @@ import java.util.concurrent.TimeUnit;
 
 public class LobbyController {
     // ── Fields ───────────────────────────────────────────────────────────────────────────────────────────────────────
+    private static final URL SCENE_FXML = LobbyController.class.getResource("/fxml/lobby.fxml");
+
     private final ScheduledExecutorService scheduler;
 
     @FXML
