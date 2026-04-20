@@ -12,6 +12,8 @@ import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import edu.uic.cs342.controllers.ServerController;
+
 public class ServerApplication extends Application {
     // ── Fields ───────────────────────────────────────────────────────────────────────────────────────────────────────
     private static final Logger LOGGER = Logger.getLogger(ServerApplication.class.getName());
