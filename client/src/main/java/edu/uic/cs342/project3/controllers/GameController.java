@@ -1,4 +1,4 @@
-package edu.uic.cs342.project3.controller;
+package edu.uic.cs342.project3.controllers;
 
 import edu.uic.cs342.project3.SceneManager;
 import edu.uic.cs342.project3.http.ClientThread;
