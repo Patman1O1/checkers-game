@@ -15,7 +15,7 @@ public class ServerApplication extends Application {
     // ── Fields ───────────────────────────────────────────────────────────────────────────────────────────────────────
     private static final Logger LOGGER = Logger.getLogger(ServerApplication.class.getName());
 
-    private static final String CSS = Objects.requireNonNull(ServerApplication.class.getResource("/css/server.css")).toExternalForm();
+    private static final String CSS = Objects.requireNonNull(ServerApplication.class.getResource("/css/index.css")).toExternalForm();
 
     private ServerThread httpServer;
 
