@@ -11,10 +11,11 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 
 import java.net.URL;
+import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 
 public class ServerController {
-    // ── Fields ──────────────────────────────────────────────────────────────────────────────────────────────────────
+    // ── Fields ───────────────────────────────────────────────────────────────────────────────────────────────────────
     @FXML
     private ListView<String> logList;
 
@@ -59,7 +60,9 @@ public class ServerController {
 
     public void appendLog(String message) {
         Platform.runLater(() -> {
-            this.logList.getItems().add(String.format("[%s] %s", DateTimeFormatter.ofPattern("HH:mm:ss"), message));
+            this.logList.getItems().add(
+                    String.format("[%s] %s", LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss")), message)
+            );
             this.logList.scrollTo(this.logList.getItems().size() - 1);
             this.refreshStats();
         });
