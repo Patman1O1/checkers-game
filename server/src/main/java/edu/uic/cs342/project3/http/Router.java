@@ -1,14 +1,14 @@
-package edu.uic.cs342.http;
+package edu.uic.cs342.project3.http;
 
-import edu.uic.cs342.models.AiPlayer;
-import edu.uic.cs342.models.GameManager;
-import edu.uic.cs342.models.Board;
-import edu.uic.cs342.models.CheckersGame;
-import edu.uic.cs342.models.Color;
-import edu.uic.cs342.models.Opponent;
-import edu.uic.cs342.models.Player;
-import edu.uic.cs342.util.JsonUtil;
-import edu.uic.cs342.util.PlayerRegistry;
+import edu.uic.cs342.project3.models.AiPlayer;
+import edu.uic.cs342.project3.models.GameManager;
+import edu.uic.cs342.project3.models.Board;
+import edu.uic.cs342.project3.models.CheckersGame;
+import edu.uic.cs342.project3.models.Color;
+import edu.uic.cs342.project3.models.Opponent;
+import edu.uic.cs342.project3.models.Player;
+import edu.uic.cs342.project3.util.JsonUtil;
+import edu.uic.cs342.project3.util.PlayerRegistry;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
