@@ -1,12 +1,12 @@
 package edu.uic.cs342.http;
 
-import edu.uic.cs342.model.AiPlayer;
-import edu.uic.cs342.model.GameManager;
-import edu.uic.cs342.model.Board;
-import edu.uic.cs342.model.CheckersGame;
-import edu.uic.cs342.model.Color;
-import edu.uic.cs342.model.Opponent;
-import edu.uic.cs342.model.Player;
+import edu.uic.cs342.models.AiPlayer;
+import edu.uic.cs342.models.GameManager;
+import edu.uic.cs342.models.Board;
+import edu.uic.cs342.models.CheckersGame;
+import edu.uic.cs342.models.Color;
+import edu.uic.cs342.models.Opponent;
+import edu.uic.cs342.models.Player;
 import edu.uic.cs342.util.JsonUtil;
 import edu.uic.cs342.util.PlayerRegistry;
 
@@ -438,13 +438,13 @@ public class Router {
     private JsonNode parseBody(HttpRequest request) {
         String body = request.getBody();
         if (body == null || body.isBlank()) {
-            return JsonUtil.getMapper().createObjectNode();
+            return JsonUtil.getObjectMapper().createObjectNode();
         }
 
         try {
-            return JsonUtil.getMapper().readTree(body);
+            return JsonUtil.getObjectMapper().readTree(body);
         } catch (Exception exception) {
-            return JsonUtil.getMapper().createObjectNode();
+            return JsonUtil.getObjectMapper().createObjectNode();
         }
     }
 
