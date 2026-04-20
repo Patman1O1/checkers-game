@@ -4,6 +4,7 @@ import edu.uic.cs342.http.ServerThread;
 
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
@@ -26,6 +27,7 @@ public class ServerApplication extends Application {
     public void start(Stage primaryStage) {
         try {
             FXMLLoader loader = new FXMLLoader(ServerController.SCENE_FXML);
+            Parent root = loader.load();
             ServerController controller = loader.getController();
 
             this.httpServer = new ServerThread(controller::appendLog);
@@ -33,7 +35,7 @@ public class ServerApplication extends Application {
 
             controller.appendLog(String.format("Checkers Server started on port %d", ServerThread.DEFAULT_PORT));
 
-            Scene scene = new Scene(loader.load(), ServerController.SCENE_WIDTH, ServerController.SCENE_HEIGHT);
+            Scene scene = new Scene(root, ServerController.SCENE_WIDTH, ServerController.SCENE_HEIGHT);
             scene.getStylesheets().add(ServerApplication.CSS);
 
             primaryStage.setTitle("Checkers Server");
