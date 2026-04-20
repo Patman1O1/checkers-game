@@ -1,4 +1,4 @@
-package edu.uic.cs342.controllers;
+package edu.uic.cs342.project3.controllers;
 
 import edu.uic.cs342.models.GameManager;
 import edu.uic.cs342.http.ServerThread;
