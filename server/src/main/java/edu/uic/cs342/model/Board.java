@@ -6,36 +6,32 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Board {
-
-    // ── Subclasses / Subrecords ───────────────────────────────────────────────
-
+    // ── Piece ────────────────────────────────────────────────────────────────────────────────────────────────────────
     public static class Piece {
+        // ── Fields ───────────────────────────────────────────────────────────────────────────────────────────────────
+        @JsonProperty("color")
+        private Color color;
 
-        // ── Fields ────────────────────────────────────────────────────────────
+        @JsonProperty("king")
+        private boolean king;
 
-        @JsonProperty("color")  private Color   color;
-        @JsonProperty("king")   private boolean king;
-
-        // ── Constructors ──────────────────────────────────────────────────────
-
+        // ── Constructors ─────────────────────────────────────────────────────────────────────────────────────────────
         public Piece() {}
 
         public Piece(Color color, boolean king) {
             this.color = color;
-            this.king  = king;
+            this.king = king;
         }
 
-        // ── Setters ───────────────────────────────────────────────────────────
+        // ── Setters ──────────────────────────────────────────────────────────────────────────────────────────────────
+        public void setKing(boolean king) { this.king = king; }
 
-        public void setKing(boolean k) { this.king = k; }
+        // ── Getters ──────────────────────────────────────────────────────────────────────────────────────────────────
+        public Color getColor() { return this.color; }
 
-        // ── Getters ───────────────────────────────────────────────────────────
+        public boolean isKing() { return this.king; }
 
-        public Color   getColor() { return this.color; }
-        public boolean isKing()   { return this.king;  }
-
-        // ── Methods ───────────────────────────────────────────────────────────
-
+        // ── Methods ──────────────────────────────────────────────────────────────────────────────────────────────────
         public Piece copy() { return new Piece(this.color, this.king); }
 
         @Override
@@ -44,41 +40,47 @@ public class Board {
         }
     }
 
-    public record Pos(int row, int col) {}
+    public static class Pos {
+        public final int rowNum, colNum;
 
-    public record Move(Pos from, Pos to) {}
+        public Pos(int rowNum, int colNum) {
+            this.rowNum = rowNum;
+            this.colNum = colNum;
+        }
+    }
 
-    // ── Fields ────────────────────────────────────────────────────────────────
+    public static class Move {
+        public final Pos from, to;
 
+        public Move(Pos from, Pos to) {
+            this.from = from;
+            this.to = to;
+        }
+    }
+
+    // ── Fields ───────────────────────────────────────────────────────────────────────────────────────────────────────
     @JsonProperty("grid")
     private Piece[][] grid;
 
-    // ── Constructors ──────────────────────────────────────────────────────────
+    // ── Constructors ─────────────────────────────────────────────────────────────────────────────────────────────────
+    public Board() { this.grid = Board.init(); }
 
-    public Board() {
-        this.grid = Board.init();
-    }
+    private Board(Piece[][] grid) { this.grid = grid; }
 
-    private Board(Piece[][] grid) {
-        this.grid = grid;
-    }
+    // ── Setters ──────────────────────────────────────────────────────────────────────────────────────────────────────
+    public void setGrid(Piece[][] grid) { this.grid = grid; }
 
-    // ── Setters ───────────────────────────────────────────────────────────────
+    // ── Getters ──────────────────────────────────────────────────────────────────────────────────────────────────────
+    public Piece[][] getGrid() { return this.grid; }
 
-    public void setGrid(Piece[][] g) { this.grid = g; }
+    public Piece pieceAt(Pos position) { return this.grid[position.rowNum][position.colNum]; }
 
-    // ── Getters ───────────────────────────────────────────────────────────────
-
-    public Piece[][] getGrid()      { return this.grid;                          }
-    public Piece     pieceAt(Pos p) { return this.grid[p.row()][p.col()]; }
-
-    // ── Methods ───────────────────────────────────────────────────────────────
-
+    // ── Methods ──────────────────────────────────────────────────────────────────────────────────────────────────────
     public String applyMove(Pos from, Pos to, Color playerColor, Color currentTurn) {
         if (!Board.inBounds(from) || !Board.inBounds(to))
             return "Position out of bounds.";
 
-        Piece piece = this.grid[from.row()][from.col()];
+        Piece piece = this.grid[from.rowNum][from.colNum];
         if (piece == null)
             return "No piece at source position.";
 
@@ -89,8 +91,9 @@ public class Board {
             return "It is not your turn.";
 
         List<Move> valid = this.validMoves(playerColor);
-        if (valid.stream().noneMatch(m -> m.from().equals(from) && m.to().equals(to)))
+        if (valid.stream().noneMatch(move -> move.from.equals(from) && move.to.equals(to))) {
             return "Invalid move.";
+        }
 
         Board.executeMove(this.grid, from, to, piece);
         return null;
@@ -112,9 +115,7 @@ public class Board {
         return new Board(Board.copyGrid(this.grid));
     }
 
-    // ── Package-accessible statics used by AiPlayer ───────────────────────────
-
-    static List<Move> getAllValidMoves(Piece[][] b, Color color) {
+    protected static List<Move> getAllValidMoves(Piece[][] b, Color color) {
         List<Move> jumps   = new ArrayList<>();
         List<Move> regular = new ArrayList<>();
 
@@ -130,95 +131,142 @@ public class Board {
         return jumps.isEmpty() ? regular : jumps;
     }
 
-    static void executeMove(Piece[][] b, Pos from, Pos to, Piece piece) {
-        b[to.row()][to.col()]     = piece;
-        b[from.row()][from.col()] = null;
+    static void executeMove(Piece[][] board, Pos from, Pos to, Piece piece) {
+        board[to.rowNum][to.colNum] = piece;
+        board[from.rowNum][from.colNum] = null;
 
-        int dr = to.row() - from.row();
-        int dc = to.col() - from.col();
-        if (Math.abs(dr) == 2)
-            b[from.row() + dr / 2][from.col() + dc / 2] = null;
+        int rowDist = to.rowNum - from.rowNum;
+        int colDist = to.colNum - from.colNum;
 
-        if (piece.getColor() == Color.RED   && to.row() == 0) piece.setKing(true);
-        if (piece.getColor() == Color.BLACK && to.row() == 7) piece.setKing(true);
+        if (Math.abs(rowDist) == 2) {
+            board[from.rowNum + rowDist / 2][from.colNum + colDist / 2] = null;
+
+        }
+
+        if (piece.getColor() == Color.RED && to.rowNum == 0) {
+            piece.setKing(true);
+        }
+
+        if (piece.getColor() == Color.BLACK && to.rowNum == 7) {
+            piece.setKing(true);
+        }
     }
 
     static Piece[][] copyGrid(Piece[][] src) {
         Piece[][] copy = new Piece[8][8];
-        for (int r = 0; r < 8; r++)
-            for (int c = 0; c < 8; c++)
-                copy[r][c] = src[r][c] == null ? null : src[r][c].copy();
+        for (int rowNum = 0; rowNum < 8; ++rowNum) {
+            for (int colNum = 0; colNum < 8; ++colNum) {
+                copy[rowNum][colNum] = src[rowNum][colNum] == null ? null : src[rowNum][colNum].copy();
+            }
+        }
         return copy;
     }
 
-    // ── Private ───────────────────────────────────────────────────────────────
-
-    private static List<Move> getRegularMoves(Piece[][] b, Pos from, Piece p) {
+    private static List<Move> getRegularMoves(Piece[][] board, Pos from, Piece piece) {
         List<Move> moves = new ArrayList<>();
-        for (int[] d : Board.directions(p)) {
-            int nr = from.row() + d[0];
-            int nc = from.col() + d[1];
-            Pos to = new Pos(nr, nc);
-            if (Board.inBounds(to) && b[nr][nc] == null)
+        for (int[] direction : Board.directions(piece)) {
+            int nextRowNum = from.rowNum + direction[0];
+            int nextColNum = from.colNum + direction[1];
+
+            Pos to = new Pos(nextRowNum, nextColNum);
+
+            if (Board.inBounds(to) && board[nextRowNum][nextColNum] == null) {
                 moves.add(new Move(from, to));
+            }
         }
         return moves;
     }
 
-    private static List<Move> getJumps(Piece[][] b, Pos from, Piece p) {
+    private static List<Move> getJumps(Piece[][] board, Pos from, Piece piece) {
         List<Move> jumps = new ArrayList<>();
-        for (int[] d : Board.directions(p)) {
-            int mr = from.row() + d[0],     mc = from.col() + d[1];
-            int nr = from.row() + d[0] * 2, nc = from.col() + d[1] * 2;
-            Pos to = new Pos(nr, nc);
-            if (!Board.inBounds(to)) continue;
-            Piece mid = b[mr][mc];
-            if (mid != null && mid.getColor() != p.getColor() && b[nr][nc] == null)
+        for (int[] direction : Board.directions(piece)) {
+            int middleRowNum = from.rowNum + direction[0];
+            int middleColNum = from.colNum + direction[1];
+
+            int nextRowNum = from.rowNum + direction[0] * 2;
+            int nextColNum = from.colNum + direction[1] * 2;
+
+            Pos to = new Pos(nextRowNum, nextColNum);
+            if (!Board.inBounds(to)) {
+                continue;
+            }
+            Piece middlePiece = board[middleRowNum][middleColNum];
+            if (middlePiece != null && middlePiece.getColor() != piece.getColor() && board[nextRowNum][nextColNum] == null) {
                 jumps.add(new Move(from, to));
+            }
         }
         return jumps;
     }
 
-    private static int[][] directions(Piece p) {
-        if (p.isKing()) return new int[][]{{-1,-1},{-1,1},{1,-1},{1,1}};
-        return p.getColor() == Color.RED
+    private static int[][] directions(Piece piece) {
+        if (piece.isKing()) {
+            return new int[][]{{-1,-1},{-1,1},{1,-1},{1,1}};
+        }
+        return piece.getColor() == Color.RED
                 ? new int[][]{{-1,-1},{-1,1}}
                 : new int[][]{{1,-1},{1,1}};
     }
 
-    private static String checkOutcome(Piece[][] b) {
+    private static String checkOutcome(Piece[][] board) {
         boolean hasRed = false, hasBlack = false;
-        for (Piece[] row : b)
-            for (Piece p : row)
-                if (p != null) {
-                    if (p.getColor() == Color.RED)   hasRed   = true;
-                    if (p.getColor() == Color.BLACK) hasBlack = true;
+        for (Piece[] row : board) {
+            for (Piece piece : row)
+                if (piece != null) {
+                    if (piece.getColor() == Color.RED) {
+                        hasRed = true;
+                    }
+
+                    if (piece.getColor() == Color.BLACK) {
+                        hasBlack = true;
+                    }
                 }
+        }
 
-        if (!hasRed)   return Color.BLACK.getValue();
-        if (!hasBlack) return Color.RED.getValue();
+        if (!hasRed) {
+            return Color.BLACK.getValue();
+        }
+        if (!hasBlack) {
+            return Color.RED.getValue();
+        }
 
-        boolean redCanMove   = !Board.getAllValidMoves(b, Color.RED).isEmpty();
-        boolean blackCanMove = !Board.getAllValidMoves(b, Color.BLACK).isEmpty();
+        boolean redCanMove = !Board.getAllValidMoves(board, Color.RED).isEmpty();
+        boolean blackCanMove = !Board.getAllValidMoves(board, Color.BLACK).isEmpty();
 
-        if (!redCanMove && !blackCanMove) return "draw";
-        if (!redCanMove)   return Color.BLACK.getValue();
-        if (!blackCanMove) return Color.RED.getValue();
+        if (!redCanMove && !blackCanMove) {
+            return "draw";
+        }
+
+        if (!redCanMove) {
+            return Color.BLACK.getValue();
+        }
+
+        if (!blackCanMove) {
+            return Color.RED.getValue();
+        }
         return null;
     }
 
-    private static boolean inBounds(Pos p) {
-        return p.row() >= 0 && p.row() < 8 && p.col() >= 0 && p.col() < 8;
+    private static boolean inBounds(Pos pos) {
+        return pos.rowNum >= 0 && pos.rowNum < 8 && pos.colNum >= 0 && pos.colNum < 8;
     }
 
     private static Piece[][] init() {
-        Piece[][] b = new Piece[8][8];
-        for (int r = 0; r < 3; r++)
-            for (int c = 0; c < 8; c++)
-                if ((r + c) % 2 == 1) b[r][c] = new Piece(Color.BLACK, false);
-        for (int r = 5; r < 8; r++)
-            for (int c = 0; c < 8; c++)
-                if ((r + c) % 2 == 1) b[r][c] = new Piece(Color.RED, false);
-        return b;
+        Piece[][] board = new Piece[8][8];
+        for (int rowNum = 0; rowNum < 3; ++rowNum) {
+            for (int colNum = 0; colNum < 8; ++colNum) {
+                if ((rowNum + colNum) % 2 == 1) {
+                    board[rowNum][colNum] = new Piece(Color.BLACK, false);
+                }
+            }
+        }
+
+        for (int rowNum = 5; rowNum < 8; ++rowNum) {
+            for (int colNum = 0; colNum < 8; ++colNum) {
+                if ((rowNum + colNum) % 2 == 1) {
+                    board[rowNum][colNum] = new Piece(Color.RED, false);
+                }
+            }
+        }
+        return board;
     }
 }
