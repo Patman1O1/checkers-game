@@ -95,9 +95,9 @@ public class GameController {
 
     public static final URL SCENE_FXML = GameController.class.getResource("/fxml/game.fxml");
 
-    public static double SCENE_WIDTH = 480.0;
+    public static double SCENE_WIDTH = 1200.0;
 
-    public static double SCENE_HEIGHT = 560.0;
+    public static double SCENE_HEIGHT = 760.0;
 
     // ── Constructors ─────────────────────────────────────────────────────────────────────────────────────────────────
     public GameController() {
