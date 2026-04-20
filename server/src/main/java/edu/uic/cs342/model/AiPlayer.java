@@ -44,7 +44,7 @@ public class AiPlayer implements Opponent {
             return null;
         }
 
-        return board.applyMove(best.from(), best.to(), color, currentTurn);
+        return board.applyMove(best.from, best.to, color, currentTurn);
     }
 
     private static MinimaxResult minimax(Board.Piece[][] board, int depth, int alpha, int beta, boolean maximising) {
@@ -58,8 +58,8 @@ public class AiPlayer implements Opponent {
         int bestScore = maximising ? Integer.MIN_VALUE : Integer.MAX_VALUE;
 
         for (Board.Move move : moves) {
-            Board.Piece[][] copy  = Board.copyGrid(board);
-            Board.executeMove(copy, move.from(), move.to(), copy[move.from().row()][move.from().col()]);
+            Board.Piece[][] copy = Board.copyGrid(board);
+            Board.executeMove(copy, move.from, move.to, copy[move.from.rowNum][move.from.colNum]);
             int score = AiPlayer.minimax(copy, depth - 1, alpha, beta, !maximising).score;
 
             if (maximising) {
