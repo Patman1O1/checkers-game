@@ -1,6 +1,6 @@
-package edu.uic.cs342.util;
+package edu.uic.cs342.project3.util;
 
-import edu.uic.cs342.models.Player;
+import edu.uic.cs342.project3.models.Player;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
