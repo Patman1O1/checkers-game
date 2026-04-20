@@ -8,79 +8,79 @@
             xmlns:fx="http://javafx.com/fxml"
             fx:controller="edu.uic.cs342.controller.LobbyController"
             styleClass="lobby-root"
-            prefWidth="1100" prefHeight="700">
+            prefWidth="1100.0" prefHeight="700.0">
 
-    <!-- ── Header ────────────────────────────────────────────────────────────── -->
+    <!-- ── Header ───────────────────────────────────────────────────────────────────────────────────────────────── -->
     <top>
-        <HBox styleClass="lobby-header" alignment="CENTER_LEFT" spacing="16">
-            <padding><Insets top="14" right="20" bottom="14" left="20"/></padding>
+        <HBox styleClass="lobby-header" alignment="CENTER_LEFT" spacing="16.0">
+            <padding><Insets top="14.0" right="20.0" bottom="14.0" left="20.0"/></padding>
             <Label text="♟" styleClass="header-crown"/>
-            <VBox spacing="2">
+            <VBox spacing="2.0">
                 <Label text="Game Lobby" styleClass="lobby-title"/>
                 <Label fx:id="welcomeLabel" text="Welcome!" styleClass="lobby-subtitle"/>
             </VBox>
             <Region HBox.hgrow="ALWAYS"/>
-            <Label fx:id="statusLabel" text="" styleClass="status-msg" visible="false" managed="false"/>
+            <Label fx:id="statusLabel" styleClass="status-msg" visible="false" managed="false"/>
             <Button text="Logout" onAction="#handleLogout" styleClass="danger-button"/>
         </HBox>
     </top>
 
-    <!-- ── Main Content (3 columns) ─────────────────────────────────────────── -->
+    <!-- ── Main Content ─────────────────────────────────────────────────────────────────────────────────────────── -->
     <center>
-        <HBox spacing="16">
-            <padding><Insets top="16" right="16" bottom="16" left="16"/></padding>
+        <HBox spacing="16.0">
+            <padding><Insets top="16.0" right="16.0" bottom="16.0" left="16.0"/></padding>
 
-            <!-- ── Left Column: Stats + New Game ─────────────────────────────── -->
-            <VBox spacing="14" prefWidth="260" minWidth="220">
+            <!-- ── Left Column: Stats + New Game ────────────────────────────────────────────────────────────────── -->
+            <VBox spacing="14.0" prefWidth="260.0" minWidth="220.0">
 
-                <!-- Stats card -->
-                <VBox styleClass="card" spacing="10">
-                    <Label text="🏆  Your Statistics" styleClass="card-title"/>
+                <!-- ── Stats Card ───────────────────────────────────────────────────────────────────────────────── -->
+                <VBox styleClass="card" spacing="10.0">
+                    <Label text="Your Statistics" styleClass="card-title"/>
                     <Separator/>
-                    <HBox alignment="CENTER_LEFT" spacing="8">
-                        <Label text="Wins"   styleClass="stat-label" HBox.hgrow="ALWAYS"/>
-                        <Label fx:id="winsLabel"   text="0" styleClass="stat-wins"/>
+                    <HBox alignment="CENTER_LEFT" spacing="8.0">
+                        <Label text="Wins" styleClass="stat-label" HBox.hgrow="ALWAYS"/>
+                        <Label fx:id="winsLabel" text="0" styleClass="stat-wins"/>
                     </HBox>
-                    <HBox alignment="CENTER_LEFT" spacing="8">
+                    <HBox alignment="CENTER_LEFT" spacing="8.0">
                         <Label text="Losses" styleClass="stat-label" HBox.hgrow="ALWAYS"/>
                         <Label fx:id="lossesLabel" text="0" styleClass="stat-losses"/>
                     </HBox>
-                    <HBox alignment="CENTER_LEFT" spacing="8">
-                        <Label text="Draws"  styleClass="stat-label" HBox.hgrow="ALWAYS"/>
-                        <Label fx:id="drawsLabel"  text="0" styleClass="stat-draws"/>
+                    <HBox alignment="CENTER_LEFT" spacing="8.0">
+                        <Label text="Draws" styleClass="stat-label" HBox.hgrow="ALWAYS"/>
+                        <Label fx:id="drawsLabel" text="0" styleClass="stat-draws"/>
                     </HBox>
                     <Separator/>
-                    <HBox alignment="CENTER_LEFT" spacing="8">
+                    <HBox alignment="CENTER_LEFT" spacing="8.0">
                         <Label text="Win Rate" styleClass="stat-label" HBox.hgrow="ALWAYS"/>
                         <Label fx:id="winRateLabel" text="0.0%" styleClass="stat-rate"/>
                     </HBox>
                 </VBox>
 
-                <!-- New Game card -->
-                <VBox styleClass="card" spacing="10" VBox.vgrow="ALWAYS">
-                    <Label text="🎮  Start New Game" styleClass="card-title"/>
+                <!-- ── New Game Card ────────────────────────────────────────────────────────────────────────────── -->
+                <VBox styleClass="card" spacing="10.0" VBox.vgrow="ALWAYS">
+                    <Label text="Start New Game" styleClass="card-title"/>
                     <Separator/>
-                    <Button text="🤖  Play vs AI"
+                    <Button text="Play vs AI"
                             onAction="#handlePlayVsAI"
                             styleClass="ai-button"
                             maxWidth="Infinity"/>
                     <Button fx:id="challengeButton"
-                            text="⚔  Challenge Selected Player"
+                            text="Challenge Selected Player"
                             onAction="#handleChallengeSelected"
                             styleClass="challenge-button"
                             maxWidth="Infinity"
                             disable="true"/>
                     <Button fx:id="challengeFriendButton"
-                            text="👥  Challenge Selected Friend"
+                            text="Challenge Selected Friend"
                             onAction="#handleChallengeFriend"
                             styleClass="challenge-button"
                             maxWidth="Infinity"/>
                 </VBox>
 
-                <!-- Incoming challenge panel -->
-                <VBox styleClass="card" spacing="8">
+                <!-- ── Incoming challenge panel ─────────────────────────────────────────────────────────────────── -->
+                <VBox styleClass="card" spacing="8.0">
                     <Label fx:id="challengeLabel"
-                           text="" styleClass="challenge-notify"
+                           styleClass="challenge-notify"
                            visible="false" managed="false"
                            wrapText="true"/>
                     <Button fx:id="acceptChallengeButton"
@@ -98,25 +98,23 @@
                 </VBox>
             </VBox>
 
-            <!-- ── Middle Column: Online Players ─────────────────────────────── -->
-            <VBox spacing="10" HBox.hgrow="ALWAYS">
-                <VBox styleClass="card" VBox.vgrow="ALWAYS" spacing="10">
+            <!-- ── Middle Column: Online Players ────────────────────────────────────────────────────────────────── -->
+            <VBox spacing="10.0" HBox.hgrow="ALWAYS">
+                <VBox styleClass="card" VBox.vgrow="ALWAYS" spacing="10.0">
                     <Label text="🟢  Online Players" styleClass="card-title"/>
                     <Label text="Select a player, then click Challenge" styleClass="card-subtitle"/>
                     <Separator/>
-                    <ListView fx:id="onlineUsersList"
-                              styleClass="player-list"
-                              VBox.vgrow="ALWAYS"/>
+                    <ListView fx:id="onlineUsersList" styleClass="player-list" VBox.vgrow="ALWAYS"/>
                 </VBox>
             </VBox>
 
-            <!-- ── Right Column: Friends ──────────────────────────────────────── -->
-            <VBox spacing="14" prefWidth="300" minWidth="260">
+            <!-- ── Right Column: Friends ────────────────────────────────────────────────────────────────────────── -->
+            <VBox spacing="14.0" prefWidth="300.0" minWidth="260.0">
 
-                <!-- Send friend request -->
-                <VBox styleClass="card" spacing="10">
-                    <Label text="➕  Send Friend Request" styleClass="card-title"/>
-                    <HBox spacing="8">
+                <!-- ── Send Friend Request UI ───────────────────────────────────────────────────────────────────── -->
+                <VBox styleClass="card" spacing="10.0">
+                    <Label text="Send Friend Request" styleClass="card-title"/>
+                    <HBox spacing="8.0">
                         <TextField fx:id="friendRequestField"
                                    promptText="Enter username"
                                    styleClass="auth-field"
@@ -126,15 +124,13 @@
                     </HBox>
                 </VBox>
 
-                <!-- Incoming friend requests -->
-                <VBox styleClass="card" spacing="8">
-                    <Label text="📩  Friend Requests" styleClass="card-title"/>
+                <!-- ── Friend Requests UI ───────────────────────────────────────────────────────────────────────── -->
+                <VBox styleClass="card" spacing="8.0">
+                    <Label text="Friend Requests" styleClass="card-title"/>
                     <Label text="Select a request, then Accept or Decline" styleClass="card-subtitle"/>
                     <Separator/>
-                    <ListView fx:id="incomingRequestsList"
-                              styleClass="player-list"
-                              prefHeight="100"/>
-                    <HBox spacing="8">
+                    <ListView fx:id="incomingRequestsList" styleClass="player-list" prefHeight="100.0"/>
+                    <HBox spacing="8.0">
                         <Button text="✅ Accept"
                                 onAction="#handleAcceptFriendRequest"
                                 styleClass="ai-button"
@@ -146,14 +142,12 @@
                     </HBox>
                 </VBox>
 
-                <!-- Friends list -->
-                <VBox styleClass="card" VBox.vgrow="ALWAYS" spacing="10">
-                    <Label text="👥  Friends" styleClass="card-title"/>
+                <!-- ── Friend List ──────────────────────────────────────────────────────────────────────────────── -->
+                <VBox styleClass="card" VBox.vgrow="ALWAYS" spacing="10.0">
+                    <Label text="Friends" styleClass="card-title"/>
                     <Label text="● = Online  ○ = Offline" styleClass="card-subtitle"/>
                     <Separator/>
-                    <ListView fx:id="friendsList"
-                              styleClass="player-list"
-                              VBox.vgrow="ALWAYS"/>
+                    <ListView fx:id="friendsList" styleClass="player-list" VBox.vgrow="ALWAYS"/>
                 </VBox>
             </VBox>
         </HBox>
