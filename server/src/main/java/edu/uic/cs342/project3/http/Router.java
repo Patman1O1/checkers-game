@@ -68,6 +68,10 @@ public class Router {
             return HttpResponse.unauthorized("Invalid username or password.");
         }
 
+        if (player.getStatus().equals(Player.Status.ONLINE)) {
+            return HttpResponse.conflict(String.format("%s is already logged in.", player.getUsername()));
+        }
+
         player.setStatus(Player.Status.ONLINE);
         PlayerRegistry.getInstance().setOnline(username);
         this.log(String.format("Login: %s", username));
