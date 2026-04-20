@@ -1,6 +1,7 @@
 package edu.uic.cs342.util;
 
-import edu.uic.cs342.model.Player;
+import edu.uic.cs342.models.Player;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.File;
