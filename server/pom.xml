@@ -21,6 +21,7 @@
     </properties>
 
     <dependencies>
+        <!-- ── JavaFX ───────────────────────────────────────────────────────────────────────────────────────────── -->
         <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-controls</artifactId>
@@ -37,6 +38,8 @@
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-base</artifactId>
         </dependency>
+
+        <!-- ── TestFX ───────────────────────────────────────────────────────────────────────────────────────────── -->
         <dependency>
             <groupId>org.testfx</groupId>
             <artifactId>testfx-core</artifactId>
@@ -48,10 +51,19 @@
             <scope>test</scope>
         </dependency>
         <dependency>
+            <groupId>org.testfx</groupId>
+            <artifactId>openjfx-monocle</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- ── JUnit 5 ──────────────────────────────────────────────────────────────────────────────────────────── -->
+        <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter</artifactId>
             <scope>test</scope>
         </dependency>
+
+        <!-- ── Jackson ──────────────────────────────────────────────────────────────────────────────────────────── -->
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
