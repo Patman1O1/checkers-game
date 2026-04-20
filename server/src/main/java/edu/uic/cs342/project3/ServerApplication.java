@@ -1,6 +1,7 @@
 package edu.uic.cs342.project3;
 
-import edu.uic.cs342.http.ServerThread;
+import edu.uic.cs342.project3.http.ServerThread;
+import edu.uic.cs342.project3.controllers.ServerController;
 
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
@@ -11,8 +12,6 @@ import javafx.stage.Stage;
 import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import edu.uic.cs342.controllers.ServerController;
 
 public class ServerApplication extends Application {
     // ── Fields ───────────────────────────────────────────────────────────────────────────────────────────────────────
