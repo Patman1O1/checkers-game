@@ -70,7 +70,7 @@ public class LobbyController {
 
     private ClientThread clientThread;
 
-    private String selectedOpponent, pendingChallenger;
+    private String selectedOpponent, pendingChallenger, exitedGameId;
 
     private ScheduledFuture<?> pollFuture;
 
@@ -179,7 +179,7 @@ public class LobbyController {
                 json -> {
                     this.showStatus(String.format("%s is now your friend!", selected), false);
                     this.loadData();
-            },
+                },
                 error -> this.showStatus(error, true));
     }
 
@@ -309,7 +309,7 @@ public class LobbyController {
         this.clientThread.getActiveGame(username,
                 json -> {
                     String gameId = json.path("gameId").asText(null);
-                    if (gameId != null && !gameId.isBlank()) {
+                    if (gameId != null && !gameId.isBlank() && !gameId.equals(this.exitedGameId)) {
                         this.onLeave();
                         this.sceneManager.showGame(gameId);
                     }
@@ -389,6 +389,11 @@ public class LobbyController {
         this.hideChallengePanel();
         this.loadData();
         this.startPolling();
+    }
+
+    public void onEnterFromGame(String leftGameId) {
+        this.exitedGameId = leftGameId;
+        this.onEnter();
     }
 
     public void onLeave() { this.stopPolling(); }
