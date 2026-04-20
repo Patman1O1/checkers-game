@@ -47,6 +47,15 @@ public class Board {
             this.rowNum = rowNum;
             this.colNum = colNum;
         }
+
+        @Override
+        public boolean equals(Object object) {
+            if (!(object instanceof Pos)) {
+                return false;
+            }
+            Pos other = (Pos) object;
+            return this.rowNum == other.rowNum && this.colNum == other.colNum;
+        }
     }
 
     public static class Move {
@@ -55,6 +64,16 @@ public class Board {
         public Move(Pos from, Pos to) {
             this.from = from;
             this.to = to;
+        }
+
+        @Override
+        public boolean equals(Object object) {
+            if (!(object instanceof Move)) {
+                return false;
+            }
+
+            Move other = (Move) object;
+            return this.from.equals(other.from) && this.to.equals(other.to);
         }
     }
 
