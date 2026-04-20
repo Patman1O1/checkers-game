@@ -1,9 +1,7 @@
-/* ── Root ─────────────────────────────────────────────────────────────────── */
-.server-root {
-    -fx-background-color: #0d0d0d;
-}
+/* ── Root ────────────────────────────────────────────────────────────────────────────────────────────────────────── */
+.server-root { -fx-background-color: #0d0d0d; }
 
-/* ── Status Bar ──────────────────────────────────────────────────────────── */
+/* ── Status Bar ──────────────────────────────────────────────────────────────────────────────────────────────────── */
 .status-bar {
     -fx-background-color: #1a0a0a;
     -fx-border-color: #4a1010;
@@ -36,7 +34,7 @@
     -fx-border-width: 1;
 }
 
-/* ── Section Label ───────────────────────────────────────────────────────── */
+/* ── Section Label ───────────────────────────────────────────────────────────────────────────────────────────────── */
 .section-label {
     -fx-font-size: 11px;
     -fx-text-fill: #6b7280;
@@ -44,7 +42,7 @@
     -fx-text-transform: uppercase;
 }
 
-/* ── Log List ─────────────────────────────────────────────────────────────── */
+/* ── Log List ────────────────────────────────────────────────────────────────────────────────────────────────────── */
 .log-list {
     -fx-background-color: #111111;
     -fx-border-color: #2a0a0a;
@@ -61,16 +59,14 @@
     -fx-padding: 4 8;
 }
 
-.log-list .list-cell:odd {
-    -fx-background-color: #161616;
-}
+.log-list .list-cell:odd { -fx-background-color: #161616; }
 
 .log-list .list-cell:selected {
     -fx-background-color: #3a1010;
     -fx-text-fill: #fca5a5;
 }
 
-/* ── Toolbar ─────────────────────────────────────────────────────────────── */
+/* ── Toolbar ─────────────────────────────────────────────────────────────────────────────────────────────────────── */
 .toolbar {
     -fx-background-color: #1a0a0a;
     -fx-border-color: #4a1010;
@@ -99,16 +95,12 @@
     -fx-border-color: #7f1d1d;
 }
 
-.tool-button.danger:hover {
-    -fx-background-color: #3d1515;
-}
+.tool-button.danger:hover { -fx-background-color: #3d1515; }
 
-/* ── ScrollBar ───────────────────────────────────────────────────────────── */
+/* ── ScrollBar ───────────────────────────────────────────────────────────────────────────────────────────────────── */
 .scroll-bar:vertical .thumb {
     -fx-background-color: #4a1010;
     -fx-background-radius: 4;
 }
 
-.scroll-bar {
-    -fx-background-color: #111111;
-}
+.scroll-bar { -fx-background-color: #111111; }
