@@ -31,7 +31,7 @@ public class ServerApplication extends Application {
             this.httpServer = new ServerThread(controller::appendLog);
             this.httpServer.start();
 
-            controller.appendLog(String.format("Checkers Server started on port %d", ServerThread.PORT));
+            controller.appendLog(String.format("Checkers Server started on port %d", ServerThread.DEFAULT_PORT));
 
             Scene scene = new Scene(loader.load(), ServerController.SCENE_WIDTH, ServerController.SCENE_HEIGHT);
             scene.getStylesheets().add(ServerApplication.CSS);
