@@ -6,7 +6,7 @@
 
 <BorderPane xmlns="http://javafx.com/javafx"
             xmlns:fx="http://javafx.com/fxml"
-            fx:controller="edu.uic.cs342.ServerController"
+            fx:controller="edu.uic.cs342.controllers.ServerController"
             styleClass="server-root"
             prefWidth="820.0" prefHeight="560.0">
 
