@@ -13,7 +13,7 @@ public class ClientApplication extends Application {
     private static final Logger LOGGER = Logger.getLogger(ClientApplication.class.getName());
 
     // ── Methods ──────────────────────────────────────────────────────────────────────────────────────────────────────
-    public static void main(String[] args) { ClientApplication.launch(args); }
+    public static void main(String[] args) { Application.launch(args); }
 
     @Override
     public void start(Stage primaryStage) {
