@@ -101,6 +101,15 @@ public class SceneManager {
         this.primaryStage.setScene(this.lobbyScene);
     }
 
+    public void showLobbyFromGame(String username, String leftGameId) {
+        this.currentUsername = username;
+
+        ((LobbyController) this.lobbyLoader.getController()).onEnterFromGame(leftGameId);
+
+        this.primaryStage.setTitle(String.format("Checkers Online \u2013 Lobby  [%s]", username));
+        this.primaryStage.setScene(this.lobbyScene);
+    }
+
     public void showGame(String gameId) {
         this.currentGameId = gameId;
 
