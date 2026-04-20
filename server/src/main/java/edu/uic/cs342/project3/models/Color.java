@@ -1,4 +1,4 @@
-package edu.uic.cs342.models;
+package edu.uic.cs342.project3.models;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
