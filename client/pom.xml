@@ -14,7 +14,7 @@
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <exec.mainClass>edu.uic.cs342.ClientApplication</exec.mainClass>
+        <exec.mainClass>edu.uic.cs342.project3.ClientApplication</exec.mainClass>
         <javafx.version>21.0.2</javafx.version>
     </properties>
 
