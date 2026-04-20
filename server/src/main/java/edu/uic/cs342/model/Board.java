@@ -76,92 +76,6 @@ public class Board {
     public Piece pieceAt(Pos position) { return this.grid[position.rowNum][position.colNum]; }
 
     // ── Methods ──────────────────────────────────────────────────────────────────────────────────────────────────────
-    public String applyMove(Pos from, Pos to, Color playerColor, Color currentTurn) {
-        if (!Board.inBounds(from) || !Board.inBounds(to))
-            return "Position out of bounds.";
-
-        Piece piece = this.grid[from.rowNum][from.colNum];
-        if (piece == null)
-            return "No piece at source position.";
-
-        if (piece.getColor() != playerColor)
-            return "That is not your piece.";
-
-        if (currentTurn != playerColor)
-            return "It is not your turn.";
-
-        List<Move> valid = this.validMoves(playerColor);
-        if (valid.stream().noneMatch(move -> move.from.equals(from) && move.to.equals(to))) {
-            return "Invalid move.";
-        }
-
-        Board.executeMove(this.grid, from, to, piece);
-        return null;
-    }
-
-    public List<Move> validMoves(Color color) {
-        return Board.getAllValidMoves(this.grid, color);
-    }
-
-    public String checkOutcome() {
-        return Board.checkOutcome(this.grid);
-    }
-
-    public Piece[][] copyGrid() {
-        return Board.copyGrid(this.grid);
-    }
-
-    public Board copy() {
-        return new Board(Board.copyGrid(this.grid));
-    }
-
-    protected static List<Move> getAllValidMoves(Piece[][] b, Color color) {
-        List<Move> jumps   = new ArrayList<>();
-        List<Move> regular = new ArrayList<>();
-
-        for (int r = 0; r < 8; r++) {
-            for (int c = 0; c < 8; c++) {
-                Piece p = b[r][c];
-                if (p == null || p.getColor() != color) continue;
-                Pos pos = new Pos(r, c);
-                jumps.addAll(Board.getJumps(b, pos, p));
-                regular.addAll(Board.getRegularMoves(b, pos, p));
-            }
-        }
-        return jumps.isEmpty() ? regular : jumps;
-    }
-
-    static void executeMove(Piece[][] board, Pos from, Pos to, Piece piece) {
-        board[to.rowNum][to.colNum] = piece;
-        board[from.rowNum][from.colNum] = null;
-
-        int rowDist = to.rowNum - from.rowNum;
-        int colDist = to.colNum - from.colNum;
-
-        if (Math.abs(rowDist) == 2) {
-            board[from.rowNum + rowDist / 2][from.colNum + colDist / 2] = null;
-
-        }
-
-        if (piece.getColor() == Color.RED && to.rowNum == 0) {
-            piece.setKing(true);
-        }
-
-        if (piece.getColor() == Color.BLACK && to.rowNum == 7) {
-            piece.setKing(true);
-        }
-    }
-
-    static Piece[][] copyGrid(Piece[][] src) {
-        Piece[][] copy = new Piece[8][8];
-        for (int rowNum = 0; rowNum < 8; ++rowNum) {
-            for (int colNum = 0; colNum < 8; ++colNum) {
-                copy[rowNum][colNum] = src[rowNum][colNum] == null ? null : src[rowNum][colNum].copy();
-            }
-        }
-        return copy;
-    }
-
     private static List<Move> getRegularMoves(Piece[][] board, Pos from, Piece piece) {
         List<Move> moves = new ArrayList<>();
         for (int[] direction : Board.directions(piece)) {
@@ -269,4 +183,83 @@ public class Board {
         }
         return board;
     }
+
+    protected static List<Move> getAllValidMoves(Piece[][] board, Color color) {
+        List<Move> jumps   = new ArrayList<>();
+        List<Move> regular = new ArrayList<>();
+
+        for (int rowNum = 0; rowNum < 8; ++rowNum) {
+            for (int colNum = 0; colNum < 8; ++colNum) {
+                Piece piece = board[rowNum][colNum];
+                if (piece == null || piece.getColor() != color) {
+                    continue;
+                }
+                Pos pos = new Pos(rowNum, colNum);
+                jumps.addAll(Board.getJumps(board, pos, piece));
+                regular.addAll(Board.getRegularMoves(board, pos, piece));
+            }
+        }
+        return jumps.isEmpty() ? regular : jumps;
+    }
+
+    protected static void executeMove(Piece[][] board, Pos from, Pos to, Piece piece) {
+        board[to.rowNum][to.colNum] = piece;
+        board[from.rowNum][from.colNum] = null;
+
+        int rowDist = to.rowNum - from.rowNum;
+        int colDist = to.colNum - from.colNum;
+
+        if (Math.abs(rowDist) == 2) {
+            board[from.rowNum + rowDist / 2][from.colNum + colDist / 2] = null;
+        }
+
+        if (piece.getColor() == Color.RED && to.rowNum == 0) {
+            piece.setKing(true);
+        }
+
+        if (piece.getColor() == Color.BLACK && to.rowNum == 7) {
+            piece.setKing(true);
+        }
+    }
+
+    protected static Piece[][] copyGrid(Piece[][] src) {
+        Piece[][] copy = new Piece[8][8];
+        for (int rowNum = 0; rowNum < 8; ++rowNum) {
+            for (int colNum = 0; colNum < 8; ++colNum) {
+                copy[rowNum][colNum] = src[rowNum][colNum] == null ? null : src[rowNum][colNum].copy();
+            }
+        }
+        return copy;
+    }
+
+    public String applyMove(Pos from, Pos to, Color playerColor, Color currentTurn) {
+        if (!Board.inBounds(from) || !Board.inBounds(to))
+            return "Position out of bounds.";
+
+        Piece piece = this.grid[from.rowNum][from.colNum];
+        if (piece == null)
+            return "No piece at source position.";
+
+        if (piece.getColor() != playerColor)
+            return "That is not your piece.";
+
+        if (currentTurn != playerColor)
+            return "It is not your turn.";
+
+        List<Move> valid = this.validMoves(playerColor);
+        if (valid.stream().noneMatch(move -> move.from.equals(from) && move.to.equals(to))) {
+            return "Invalid move.";
+        }
+
+        Board.executeMove(this.grid, from, to, piece);
+        return null;
+    }
+
+    public List<Move> validMoves(Color color) { return Board.getAllValidMoves(this.grid, color); }
+
+    public String checkOutcome() { return Board.checkOutcome(this.grid); }
+
+    public Piece[][] copyGrid() { return Board.copyGrid(this.grid); }
+
+    public Board copy() { return new Board(Board.copyGrid(this.grid)); }
 }
