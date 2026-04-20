@@ -1,0 +1,12 @@
+{
+  "name" : "user2",
+  "status" : "OFFLINE",
+  "username" : "user2",
+  "password" : "password",
+  "wins" : 0,
+  "losses" : 0,
+  "draws" : 0,
+  "friends" : [ ],
+  "incomingFriendRequests" : [ ],
+  "outgoingFriendRequests" : [ ]
+}
