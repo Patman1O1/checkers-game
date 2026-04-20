@@ -1,4 +1,4 @@
-package edu.uic.cs342.project3.model;
+package edu.uic.cs342.project3.models;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
