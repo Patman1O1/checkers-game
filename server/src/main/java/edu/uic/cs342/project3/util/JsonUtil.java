@@ -1,4 +1,4 @@
-package edu.uic.cs342.util;
+package edu.uic.cs342.project3.util;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
