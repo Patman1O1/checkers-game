@@ -1,9 +1,9 @@
 package edu.uic.cs342.project3.controllers;
 
-import edu.uic.cs342.models.GameManager;
-import edu.uic.cs342.http.ServerThread;
-import edu.uic.cs342.models.CheckersGame;
-import edu.uic.cs342.util.PlayerRegistry;
+import edu.uic.cs342.project3.models.GameManager;
+import edu.uic.cs342.project3.http.ServerThread;
+import edu.uic.cs342.project3.models.CheckersGame;
+import edu.uic.cs342.project3.util.PlayerRegistry;
 
 import javafx.application.Platform;
 import javafx.fxml.FXML;
