@@ -4,32 +4,30 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.geometry.Insets?>
 
-<!-- mirrors Login.tsx: Crown icon, Login + Sign Up tabs -->
 <VBox xmlns="http://javafx.com/javafx"
       xmlns:fx="http://javafx.com/fxml"
       fx:controller="edu.uic.cs342.controller.LoginController"
       styleClass="login-root"
       alignment="CENTER"
-      spacing="0"
-      prefWidth="480" prefHeight="560">
+      prefWidth="480.0" prefHeight="560.0">
 
-    <padding><Insets top="40" right="50" bottom="40" left="50"/></padding>
+    <padding><Insets top="40.0" right="50.0" bottom="40.0" left="50.0"/></padding>
 
-    <!-- ── Logo / Title ──────────────────────────────────────────────────────── -->
-    <VBox alignment="CENTER" spacing="6">
-        <VBox.margin><Insets bottom="24"/></VBox.margin>
+    <!-- ── Logo / Title ─────────────────────────────────────────────────────────────────────────────────────────── -->
+    <VBox alignment="CENTER" spacing="6.0">
+        <VBox.margin><Insets bottom="24.0"/></VBox.margin>
         <Label text="♟" styleClass="crown-icon"/>
         <Label text="Checkers Online" styleClass="app-title"/>
         <Label text="Multiplayer Checkers with AI" styleClass="app-subtitle"/>
     </VBox>
 
-    <!-- ── Tab Pane ──────────────────────────────────────────────────────────── -->
+    <!-- ── Tab Pane ─────────────────────────────────────────────────────────────────────────────────────────────── -->
     <TabPane fx:id="tabPane" styleClass="auth-tabs" tabClosingPolicy="UNAVAILABLE">
 
-        <!-- ── Login Tab ─────────────────────────────────────────────────────── -->
+        <!-- ── Login Tab ────────────────────────────────────────────────────────────────────────────────────────── -->
         <Tab text="Login">
-            <VBox spacing="14" styleClass="tab-content">
-                <padding><Insets top="24" right="0" bottom="24" left="0"/></padding>
+            <VBox spacing="14.0" styleClass="tab-content">
+                <padding><Insets top="24.0" bottom="24.0"/></padding>
 
                 <Label text="Welcome Back" styleClass="card-title"/>
                 <Label text="Enter your credentials to play" styleClass="card-subtitle"/>
@@ -60,10 +58,10 @@
             </VBox>
         </Tab>
 
-        <!-- ── Sign Up Tab ───────────────────────────────────────────────────── -->
+        <!-- ── Sign Up Tab ──────────────────────────────────────────────────────────────────────────────────────── -->
         <Tab text="Sign Up">
-            <VBox spacing="12" styleClass="tab-content">
-                <padding><Insets top="20" right="0" bottom="20" left="0"/></padding>
+            <VBox spacing="12.0" styleClass="tab-content">
+                <padding><Insets top="20.0" bottom="20.0"/></padding>
 
                 <Label text="Create Account" styleClass="card-title"/>
                 <Label text="Sign up to start playing" styleClass="card-subtitle"/>
