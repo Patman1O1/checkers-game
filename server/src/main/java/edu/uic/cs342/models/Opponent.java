@@ -1,4 +1,4 @@
-package edu.uic.cs342.model;
+package edu.uic.cs342.models;
 
 public interface Opponent {
     // ── Getters ──────────────────────────────────────────────────────────────────────────────────────────────────────
