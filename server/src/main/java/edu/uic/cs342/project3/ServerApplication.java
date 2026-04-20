@@ -1,4 +1,4 @@
-package edu.uic.cs342;
+package edu.uic.cs342.project3;
 
 import edu.uic.cs342.http.ServerThread;
 
