@@ -1,4 +1,4 @@
-package edu.uic.cs342.http;
+package edu.uic.cs342.project3.http;
 
 import java.io.Serializable;
 
