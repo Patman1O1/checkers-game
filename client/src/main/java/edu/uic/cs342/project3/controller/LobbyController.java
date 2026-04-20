@@ -111,10 +111,11 @@ public class LobbyController {
         if (selectedFriendName == null) {
             return;
         }
+
         String friendName = selectedFriendName.replaceFirst("^[\u25cf\u25cb] ", "").split("\\s+")[0];
         this.clientThread.sendChallenge(this.sceneManager.getCurrentUsername(), friendName,
                 json -> this.showStatus(String.format("Challenge sent to %s !", friendName), false),
-                err  -> this.showStatus("Could not send challenge: " + err, true));
+                error -> this.showStatus(String.format("Could not send challenge: %s", error), true));
     }
 
     @FXML
@@ -129,7 +130,7 @@ public class LobbyController {
                     this.onLeave();
                     this.sceneManager.showGame(gameId);
                 },
-                err -> this.showStatus("Could not accept challenge: " + err, true));
+                error -> this.showStatus(String.format("Could not accept challenge: %s", error), true));
     }
 
     @FXML
@@ -228,8 +229,8 @@ public class LobbyController {
                     }
                     this.loadFriends(username);
                 },
-                err -> {
-                    this.showStatus("Could not load users: " + err, true);
+                error -> {
+                    this.showStatus(String.format("Could not load users: %s", error), true);
                     this.loadFriends(username);
                 });
     }
