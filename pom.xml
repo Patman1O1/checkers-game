@@ -13,6 +13,7 @@
     <modules>
         <module>server</module>
         <module>client</module>
+        <module>main</module>
     </modules>
 
 
@@ -20,11 +21,11 @@
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <exec.mainClass>edu.uic.cs342.project3.MainApplication</exec.mainClass>
     </properties>
 
     <dependencyManagement>
         <dependencies>
+            <!-- ── JavaFX ───────────────────────────────────────────────────────────────────────────────────────────── -->
             <dependency>
                 <groupId>org.openjfx</groupId>
                 <artifactId>javafx-controls</artifactId>
@@ -45,24 +46,36 @@
                 <artifactId>javafx-base</artifactId>
                 <version>19.0.2.1</version>
             </dependency>
+
+            <!-- ── TestFX ───────────────────────────────────────────────────────────────────────────────────────────── -->
             <dependency>
                 <groupId>org.testfx</groupId>
                 <artifactId>testfx-core</artifactId>
-                <version>4.0.18</version>
+                <version>4.0.16-alpha</version>
                 <scope>test</scope>
             </dependency>
             <dependency>
                 <groupId>org.testfx</groupId>
                 <artifactId>testfx-junit5</artifactId>
-                <version>4.0.18</version>
+                <version>4.0.16-alpha</version>
                 <scope>test</scope>
             </dependency>
+            <dependency>
+                <groupId>org.testfx</groupId>
+                <artifactId>openjfx-monocle</artifactId>
+                <version>jdk-12.0.1+2</version>
+                <scope>test</scope>
+            </dependency>
+
+            <!-- ── JUnit 5 ──────────────────────────────────────────────────────────────────────────────────────────── -->
             <dependency>
                 <groupId>org.junit.jupiter</groupId>
                 <artifactId>junit-jupiter</artifactId>
                 <version>5.9.1</version>
                 <scope>test</scope>
             </dependency>
+
+            <!-- ── Jackson ──────────────────────────────────────────────────────────────────────────────────────────── -->
             <dependency>
                 <groupId>com.fasterxml.jackson.core</groupId>
                 <artifactId>jackson-databind</artifactId>
@@ -75,4 +88,34 @@
             </dependency>
         </dependencies>
     </dependencyManagement>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>3.1.2</version>
+                <configuration>
+                    <!--
+                        Opens JavaFX internals needed by TestFX and Monocle.
+                        Copy these verbatim into your existing pom.xml if you
+                        merge this into the main project.
+                    -->
+                    <argLine>
+                        --add-opens javafx.graphics/com.sun.javafx.application=ALL-UNNAMED
+                        --add-opens javafx.graphics/com.sun.glass.ui=ALL-UNNAMED
+                        --add-opens java.base/java.lang.reflect=ALL-UNNAMED
+                        -Dtestfx.robot=glass
+                        -Dtestfx.headless=true
+                        -Dprism.order=sw
+                        -Dprism.text=t2k
+                        -Djava.awt.headless=true
+                    </argLine>
+                    <includes>
+                        <include>**/*Test.java</include>
+                    </includes>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 </project>
