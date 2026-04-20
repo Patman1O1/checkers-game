@@ -339,7 +339,10 @@ public class GameController {
         boolean isJump = Math.abs(rowDist) == 2 && Math.abs(colDist) == 2;
         boolean isRegular = Math.abs(rowDist) == 1 && Math.abs(colDist) == 1;
 
-        if (!isJump && !isRegular || this.anyJumpExists(grid, this.playerColor)) {
+        if (!isJump && !isRegular) {
+            return false;
+        }
+        if (!isJump && this.anyJumpExists(grid, this.playerColor)) {
             return false;
         }
 
