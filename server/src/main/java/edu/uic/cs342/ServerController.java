@@ -54,7 +54,7 @@ public class ServerController {
 
     @FXML
     public void initialize() {
-        this.portLabel.setText(String.format("Port: %d", ServerThread.PORT));
+        this.portLabel.setText(String.format("Port: %d", ServerThread.DEFAULT_PORT));
         this.statusLabel.setText("● Running");
         this.statusLabel.setStyle("-fx-text-fill: #4ade80;");
         this.refreshStats();
