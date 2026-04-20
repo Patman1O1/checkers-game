@@ -1,7 +1,7 @@
-package edu.uic.cs342.controller;
+package edu.uic.cs342.project3.controller;
 
-import edu.uic.cs342.SceneManager;
-import edu.uic.cs342.http.ClientThread;
+import edu.uic.cs342.project3.SceneManager;
+import edu.uic.cs342.project3.http.ClientThread;
 
 import com.fasterxml.jackson.databind.JsonNode;
 

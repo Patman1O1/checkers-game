@@ -1,8 +1,8 @@
-package edu.uic.cs342.controller;
+package edu.uic.cs342.project3.controller;
 
-import edu.uic.cs342.SceneManager;
-import edu.uic.cs342.http.ClientThread;
-import edu.uic.cs342.model.GameState;
+import edu.uic.cs342.project3.SceneManager;
+import edu.uic.cs342.project3.http.ClientThread;
+import edu.uic.cs342.project3.model.GameState;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 

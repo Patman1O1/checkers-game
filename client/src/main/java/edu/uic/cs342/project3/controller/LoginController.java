@@ -1,7 +1,7 @@
-package edu.uic.cs342.controller;
+package edu.uic.cs342.project3.controller;
 
-import edu.uic.cs342.SceneManager;
-import edu.uic.cs342.http.ClientThread;
+import edu.uic.cs342.project3.SceneManager;
+import edu.uic.cs342.project3.http.ClientThread;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -53,9 +53,9 @@ public class LoginController {
 
     public static final URL SCENE_FXML = LoginController.class.getResource("/fxml/login.fxml");
 
-    public static final double SCENE_WIDTH = 1200.0;
+    public static final double SCENE_WIDTH = 480.0;
 
-    public static final double SCENE_HEIGHT = 760.0;
+    public static final double SCENE_HEIGHT = 560.0;
 
     // ── Setters ──────────────────────────────────────────────────────────────────────────────────────────────────────
     public void setSceneManager(SceneManager sceneManager) { this.sceneManager = sceneManager; }

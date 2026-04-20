@@ -1,29 +1,34 @@
-package edu.uic.cs342.http;
+package edu.uic.cs342.project3.http;
 
 import java.io.Serializable;
 
-public class HttpResponse implements Serializable {
+public class HttpRequest implements Serializable {
     // ── Fields ───────────────────────────────────────────────────────────────────────────────────────────────────────
     private static final long serialVersionUID = 1L;
 
-    private final int statusCode;
-
-    private final String body;
+    private final String method, path, body;
 
     // ── Constructors ─────────────────────────────────────────────────────────────────────────────────────────────────
-    public HttpResponse(int statusCode, String body) {
-        this.statusCode = statusCode;
+    public HttpRequest(String method, String path, String body) {
+        this.method = method.toUpperCase();
+        this.path = path;
         this.body = body;
     }
 
+    public HttpRequest(String method, String path) {
+        this.method = method.toUpperCase();
+        this.path = path;
+        this.body = "";
+    }
+
     // ── Getters ──────────────────────────────────────────────────────────────────────────────────────────────────────
-    public int getStatusCode() { return this.statusCode; }
+    public String getMethod() { return this.method; }
+
+    public String getPath() { return this.path; }
 
     public String getBody() { return this.body; }
 
-    public boolean isOk() { return this.statusCode < 400; }
-
     // ── Methods ──────────────────────────────────────────────────────────────────────────────────────────────────────
     @Override
-    public String toString() { return String.format("%d %s", this.statusCode, this.body); }
+    public String toString() { return String.format("%s %s", this.method, this.path); }
 }

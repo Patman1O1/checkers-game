@@ -1,6 +1,6 @@
-package edu.uic.cs342;
+package edu.uic.cs342.project3;
 
-import edu.uic.cs342.http.ClientThread;
+import edu.uic.cs342.project3.http.ClientThread;
 
 import javafx.application.Application;
 import javafx.stage.Stage;

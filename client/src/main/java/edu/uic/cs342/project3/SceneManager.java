@@ -1,9 +1,9 @@
-package edu.uic.cs342;
+package edu.uic.cs342.project3;
 
-import edu.uic.cs342.controller.GameController;
-import edu.uic.cs342.controller.LobbyController;
-import edu.uic.cs342.controller.LoginController;
-import edu.uic.cs342.http.ClientThread;
+import edu.uic.cs342.project3.controller.GameController;
+import edu.uic.cs342.project3.controller.LobbyController;
+import edu.uic.cs342.project3.controller.LoginController;
+import edu.uic.cs342.project3.http.ClientThread;
 
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
