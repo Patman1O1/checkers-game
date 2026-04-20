@@ -3,8 +3,17 @@ package edu.uic.cs342.model;
 import java.util.List;
 
 public class AiPlayer implements Opponent {
-    // ── Subrecords ────────────────────────────────────────────────────────────
-    private record MinimaxResult(Board.Move move, int score) {}
+    // ── MinimaxResult ────────────────────────────────────────────────────────────────────────────────────────────────
+    private static class MinimaxResult {
+        private final Board.Move move;
+
+        private final int score;
+
+        public MinimaxResult(Board.Move move, int score) {
+            this.move = move;
+            this.score = score;
+        }
+    }
 
     // ── Fields ───────────────────────────────────────────────────────────────────────────────────────────────────────
     private static final int MAX_DEPTH = 5;
