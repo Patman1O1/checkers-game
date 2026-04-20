@@ -10,7 +10,7 @@
             styleClass="server-root"
             prefWidth="820.0" prefHeight="560.0">
 
-    <!-- ── Top Status Bar ───────────────────────────────────────────────────────────────────────────────────────── -->
+    <!-- ── Status Bar ───────────────────────────────────────────────────────────────────────────────────────────── -->
     <top>
         <HBox styleClass="status-bar" spacing="20.0" alignment="CENTER_LEFT">
             <padding><Insets top="10.0" right="16.0" bottom="10.0" left="16.0"/></padding>
