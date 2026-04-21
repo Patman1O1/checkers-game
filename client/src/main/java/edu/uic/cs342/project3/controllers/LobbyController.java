@@ -167,7 +167,7 @@ public class LobbyController {
     }
 
     private void handleOnlineUserClick(String name) {
-        Button addButton = LobbyController.styledButton("\u2795  Add Friend", "#1d4ed8");
+        Button addButton = LobbyController.styledButton("➕  Add Friend", "#1d4ed8");
         addButton.setOnAction(event -> {
             this.closeActivePopup();
             this.clientThread.addFriend(this.sceneManager.getCurrentUsername(), name,
@@ -178,7 +178,7 @@ public class LobbyController {
                     error -> this.showStatus(error, true));
         });
 
-        Button challengeButton = LobbyController.styledButton("\u2694  Challenge", "#b45309");
+        Button challengeButton = LobbyController.styledButton("⚔  Challenge", "#b45309");
         challengeButton.setOnAction(event -> {
             this.closeActivePopup();
             this.clientThread.sendChallenge(this.sceneManager.getCurrentUsername(), name,
@@ -190,9 +190,9 @@ public class LobbyController {
     }
 
     private void handleFriendClick(String item) {
-        String name = item.replaceFirst("^[\u25cf\u25cb]\\s*", "").split("\\s+")[0];
+        String name = item.replaceFirst("^[●○]\\s*", "").split("\\s+")[0];
 
-        Button challengeButton = LobbyController.styledButton("\u2694  Challenge", "#b45309");
+        Button challengeButton = LobbyController.styledButton("⚔  Challenge", "#b45309");
         challengeButton.setOnAction(event -> {
             this.closeActivePopup();
             this.clientThread.sendChallenge(this.sceneManager.getCurrentUsername(), name,
@@ -215,7 +215,7 @@ public class LobbyController {
     }
 
     private void handleChallengeClick(String challenger) {
-        Button acceptButton = LobbyController.styledButton("\u2705  Accept", "#15803d");
+        Button acceptButton = LobbyController.styledButton("✅  Accept", "#15803d");
         acceptButton.setOnAction(event -> {
             this.closeActivePopup();
             this.clientThread.acceptChallenge(this.sceneManager.getCurrentUsername(), challenger,
@@ -228,7 +228,7 @@ public class LobbyController {
                     error -> this.showStatus(String.format("Could not accept: %s", error), true));
         });
 
-        Button declineButton = LobbyController.styledButton("\u274C  Decline", "#7f1d1d");
+        Button declineButton = LobbyController.styledButton("❌  Decline", "#7f1d1d");
         declineButton.setOnAction(event -> {
             this.closeActivePopup();
             this.clientThread.declineChallenge(this.sceneManager.getCurrentUsername(), challenger,
@@ -289,8 +289,8 @@ public class LobbyController {
                         int draws = friendNode.path("stats").path("draws").asInt();
 
                         this.friendsList.getItems().add(String.format(
-                                "%s %s  W:%draws L:%draws D:%draws",
-                                online ? "\u25cf" : "\u25cb", name, wins, losses, draws));
+                                "%s %s  W:%d wins L:%d losses D:%d draws",
+                                online ? "●" : "○", name, wins, losses, draws));
                     }
                     this.loadStats(username);
                 },
