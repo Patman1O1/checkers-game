@@ -9,7 +9,7 @@
       fx:controller="edu.uic.cs342.project3.controllers.LoginController"
       styleClass="login-root"
       alignment="CENTER"
-      prefWidth="480.0" prefHeight="560.0">
+      prefWidth="480.0" prefHeight="680.0">
 
     <padding><Insets top="40.0" right="50.0" bottom="40.0" left="50.0"/></padding>
 
