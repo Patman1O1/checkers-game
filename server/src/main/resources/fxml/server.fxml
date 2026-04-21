@@ -19,7 +19,7 @@
 
             <Region HBox.hgrow="ALWAYS"/>
 
-            <Label fx:id="statusLabel" text="● Starting…" styleClass="status-badge"/>
+            <Label fx:id="statusLabel" text="● Starting..." styleClass="status-badge"/>
             <Label fx:id="portLabel" text="Port: 8080" styleClass="info-badge"/>
             <Label fx:id="onlineLabel" text="Online: 0" styleClass="info-badge"/>
             <Label fx:id="gamesLabel" text="Games: 0" styleClass="info-badge"/>
