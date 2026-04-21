@@ -129,10 +129,11 @@ public class GameController {
 
     @FXML
     private void handleBackToLobby() {
+        String leftGameId = this.gameId;
         this.stopPolling();
-        this.playerColor = null;
+        this.playerColor  = null;
         this.currentState = null;
-        this.sceneManager.showLobby(this.username);
+        this.sceneManager.showLobbyFromGame(this.username, leftGameId);
     }
 
     private void loadGameState() {
