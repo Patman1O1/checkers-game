@@ -177,7 +177,7 @@ public class GameController {
         if (state.player2.equalsIgnoreCase(this.username)) {
             player2Name = player2Name.concat("(you)");
         }
-        this.player2Label.setText(String.format("\u26AB %s", player2Name));
+        this.player2Label.setText(String.format("⚫ %s", player2Name));
         if (this.player1SideLabel != null) {
             this.player1SideLabel.setText(player2Name);
         }
@@ -276,7 +276,7 @@ public class GameController {
         stackPane.getChildren().add(circle);
 
         if (piece.king) {
-            Text crown = new Text("\u265B");
+            Text crown = new Text("♛");
             crown.setFill(Color.web("#fbbf24"));
             crown.setStyle("-fx-font-size: 18px;");
             stackPane.getChildren().add(crown);
