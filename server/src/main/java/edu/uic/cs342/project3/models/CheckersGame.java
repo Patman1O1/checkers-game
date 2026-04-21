@@ -8,32 +8,41 @@ import java.util.List;
 import java.util.UUID;
 
 public class CheckersGame {
+    // ── Status ───────────────────────────────────────────────────────────────────────────────────────────────────────
+    public static enum Status {
+        // ── Constants ────────────────────────────────────────────────────────────────────────────────────────────────
+        WAITING,
+        ACTIVE,
+        COMPLETED;
+    }
 
-    // ── Subenums / Subclasses ─────────────────────────────────────────────────
-
-    public enum Status { WAITING, ACTIVE, COMPLETED }
-
+    // ── Chat Entry ───────────────────────────────────────────────────────────────────────────────────────────────────
     public static class ChatEntry {
+        // ── Fields ───────────────────────────────────────────────────────────────────────────────────────────────────
+        @JsonProperty("player")
+        public String player;
 
-        // ── Fields ────────────────────────────────────────────────────────────
+        @JsonProperty("message")
+        public String message;
 
-        @JsonProperty("player")    public String player;
-        @JsonProperty("message")   public String message;
-        @JsonProperty("timestamp") public String timestamp;
+        @JsonProperty("timestamp")
+        public String timestamp;
 
-        // ── Constructors ──────────────────────────────────────────────────────
-
-        public ChatEntry() {}
+        // ── Constructors ─────────────────────────────────────────────────────────────────────────────────────────────
+        public ChatEntry() {
+            this.player = null;
+            this.message = null;
+            this.timestamp = null;
+        }
 
         public ChatEntry(String player, String message) {
-            this.player    = player;
-            this.message   = message;
+            this.player = player;
+            this.message = message;
             this.timestamp = Instant.now().toString();
         }
     }
 
-    // ── Fields ────────────────────────────────────────────────────────────────
-
+    // ── Fields ───────────────────────────────────────────────────────────────────────────────────────────────────────
     @JsonProperty("id")          private final String          id;
     @JsonProperty("player1")     private final String          player1;
     @JsonProperty("player2")     private       String          player2;
@@ -44,55 +53,58 @@ public class CheckersGame {
     @JsonProperty("winner")      private       String          winner;
     @JsonProperty("chat")        private       List<ChatEntry> chat;
 
-    // ── Constructors ──────────────────────────────────────────────────────────
-
+    // ── Constructors ─────────────────────────────────────────────────────────────────────────────────────────────────
     public CheckersGame(String player1, String player2, boolean vsAI) {
-        this.id          = UUID.randomUUID().toString();
-        this.player1     = player1;
-        this.player2     = vsAI ? "AI" : player2;
-        this.vsAI        = vsAI;
-        this.board       = new Board();
+        this.id = UUID.randomUUID().toString();
+        this.player1 = player1;
+        this.player2 = vsAI ? "AI" : player2;
+        this.vsAI = vsAI;
+        this.board = new Board();
         this.currentTurn = Color.RED;
-        this.status      = CheckersGame.Status.ACTIVE;
-        this.winner      = null;
-        this.chat        = new ArrayList<>();
+        this.status = CheckersGame.Status.ACTIVE;
+        this.winner = null;
+        this.chat = new ArrayList<>();
     }
 
     public CheckersGame() {
-        this.id      = UUID.randomUUID().toString();
+        this.id = UUID.randomUUID().toString();
         this.player1 = "";
-        this.vsAI    = false;
-        this.board   = new Board();
+        this.vsAI = false;
+        this.board = new Board();
     }
 
-    // ── Setters ───────────────────────────────────────────────────────────────
+    // ── Setters ──────────────────────────────────────────────────────────────────────────────────────────────────────
+    public void setPlayer2(String player2) { this.player2 = player2; }
 
-    public void setPlayer2(String p)    { this.player2     = p; }
-    public void setCurrentTurn(Color t) { this.currentTurn = t; }
-    public void setStatus(Status s)     { this.status      = s; }
-    public void setWinner(String w)     { this.winner      = w; }
+    public void setCurrentTurn(Color currentTurn) { this.currentTurn = currentTurn; }
 
-    // ── Getters ───────────────────────────────────────────────────────────────
+    public void setStatus(Status status) { this.status = status; }
 
-    public String          getId()          { return this.id;          }
-    public String          getPlayer1()     { return this.player1;     }
-    public String          getPlayer2()     { return this.player2;     }
-    public boolean         isVsAI()         { return this.vsAI;        }
-    public Board           getBoard()       { return this.board;       }
-    public Color           getCurrentTurn() { return this.currentTurn; }
-    public Status          getStatus()      { return this.status;      }
-    public String          getWinner()      { return this.winner;      }
-    public List<ChatEntry> getChat()        { return this.chat;        }
+    public void setWinner(String winner) { this.winner = winner; }
 
-    // ── Methods ───────────────────────────────────────────────────────────────
+    // ── Getters ──────────────────────────────────────────────────────────────────────────────────────────────────────
+    public String getId() { return this.id; }
 
-    public void addChat(String player, String message) {
-        this.chat.add(new CheckersGame.ChatEntry(player, message));
-    }
+    public String getPlayer1() { return this.player1; }
 
-    public void flipTurn() {
-        this.currentTurn = this.currentTurn.opposite();
-    }
+    public String getPlayer2() { return this.player2; }
+
+    public boolean isVsAI() { return this.vsAI; }
+
+    public Board getBoard() { return this.board; }
+
+    public Color getCurrentTurn() { return this.currentTurn; }
+
+    public Status getStatus() { return this.status; }
+
+    public String getWinner() { return this.winner; }
+
+    public List<ChatEntry> getChat() { return this.chat; }
+
+    // ── Methods ──────────────────────────────────────────────────────────────────────────────────────────────────────
+    public void addChat(String player, String message) { this.chat.add(new CheckersGame.ChatEntry(player, message)); }
+
+    public void flipTurn() { this.currentTurn = this.currentTurn.opposite(); }
 
     public void endGame(String outcome) {
         this.winner = outcome;
@@ -103,9 +115,7 @@ public class CheckersGame {
         return this.player1.equalsIgnoreCase(username) || this.player2.equalsIgnoreCase(username);
     }
 
-    public Color colorOf(String username) {
-        return this.player1.equalsIgnoreCase(username) ? Color.RED : Color.BLACK;
-    }
+    public Color colorOf(String username) { return this.player1.equalsIgnoreCase(username) ? Color.RED : Color.BLACK; }
 
     public String takeTurn(Opponent opponent, Board.Pos from, Board.Pos to) {
         Color playerColor = this.colorOf(opponent.getName());
@@ -119,8 +129,11 @@ public class CheckersGame {
         if (error != null) return error;
 
         String outcome = this.board.checkOutcome();
-        if (outcome != null) this.endGame(outcome);
-        else                 this.flipTurn();
+        if (outcome != null) {
+            this.endGame(outcome);
+        } else {
+            this.flipTurn();
+        }
 
         return null;
     }
