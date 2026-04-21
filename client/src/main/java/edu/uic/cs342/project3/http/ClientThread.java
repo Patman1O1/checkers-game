@@ -16,7 +16,6 @@ import java.util.logging.Logger;
 
 public class ClientThread extends Thread {
     // ── Callback ─────────────────────────────────────────────────────────────────────────────────────────────────────
-
     private static class Callback {
         // ── Fields ───────────────────────────────────────────────────────────────────────────────────────────────────
         private final Consumer<JsonNode> onSuccess;
