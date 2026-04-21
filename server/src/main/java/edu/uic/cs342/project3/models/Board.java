@@ -198,7 +198,7 @@ public class Board {
     }
 
     protected static List<Move> getAllValidMoves(Piece[][] board, Color color) {
-        List<Move> jumps   = new ArrayList<>();
+        List<Move> jumps = new ArrayList<>();
         List<Move> regular = new ArrayList<>();
 
         for (int rowNum = 0; rowNum < 8; ++rowNum) {
@@ -273,6 +273,4 @@ public class Board {
     public String checkOutcome() { return Board.checkOutcome(this.grid); }
 
     public Piece[][] copyGrid() { return Board.copyGrid(this.grid); }
-
-    public Board copy() { return new Board(Board.copyGrid(this.grid)); }
 }
