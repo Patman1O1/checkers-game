@@ -59,73 +59,6 @@ public class ClientThread extends Thread {
     public static ClientThread getInstance() { return ClientThread.INSTANCE; }
 
     // ── Methods ──────────────────────────────────────────────────────────────────────────────────────────────────────
-    private void get(String path, Consumer<JsonNode> onSuccess, Consumer<String> onError) {
-        this.send(new HttpRequest("GET", path), onSuccess, onError);
-    }
-
-    private void post(String path, String jsonBody,
-                      Consumer<JsonNode> onSuccess, Consumer<String> onError) {
-        this.send(new HttpRequest("POST", path, jsonBody), onSuccess, onError);
-    }
-
-    private synchronized void send(HttpRequest req,
-                                   Consumer<JsonNode> onSuccess, Consumer<String> onError) {
-        if (this.outputStream == null) {
-            Platform.runLater(() -> onError.accept("Not connected to server."));
-            return;
-        }
-
-        this.pending = new Callback(onSuccess, onError);
-
-        try {
-            this.outputStream.writeObject(req);
-            this.outputStream.flush();
-        } catch (IOException exception) {
-            this.pending = null;
-            Platform.runLater(() -> onError.accept(String.format("Failed to send request: %s", exception.getMessage())));
-            ClientThread.LOGGER.log(Level.SEVERE, exception.getMessage(), exception);
-        }
-    }
-
-    private void dispatch(HttpResponse response) {
-        Callback callback;
-        synchronized (this) {
-            callback = this.pending;
-            this.pending  = null;
-        }
-
-        if (callback == null) {
-            ClientThread.LOGGER.warning("Received response with no pending callback");
-            return;
-        }
-
-        String body = response.getBody();
-        try {
-            JsonNode json = (body == null || body.isBlank())
-                    ? ClientThread.OBJECT_MAPPER.createObjectNode()
-                    : ClientThread.OBJECT_MAPPER.readTree(body);
-
-            if (response.isOk()) {
-                Platform.runLater(() -> callback.onSuccess.accept(json));
-            } else {
-                String error = json.has("error")
-                        ? json.get("error").asText()
-                        : String.format("Server error: %d", response.getStatusCode());
-                Platform.runLater(() -> callback.onError.accept(error));
-            }
-        } catch (Exception exception) {
-            Platform.runLater(() -> callback.onError.accept(String.format("Failed to parse response: %s", exception.getMessage())));
-        }
-    }
-
-    private synchronized void failPending(String reason) {
-        if (this.pending != null) {
-            Callback callback = this.pending;
-            this.pending = null;
-            Platform.runLater(() -> callback.onError.accept(reason));
-        }
-    }
-
     public void signup(String username, String password, Consumer<JsonNode> onSuccess, Consumer<String> onError) {
         ObjectNode body = ClientThread.OBJECT_MAPPER.createObjectNode();
         body.put("username", username);
@@ -155,28 +88,20 @@ public class ClientThread extends Thread {
         this.get("/users/" + username + "/stats", onSuccess, onError);
     }
 
-    public void sendFriendRequest(String username, String targetUsername,
-                                  Consumer<JsonNode> onSuccess, Consumer<String> onError) {
+    public void addFriend(String username, String targetUsername,
+                          Consumer<JsonNode> onSuccess, Consumer<String> onError) {
         ObjectNode body = ClientThread.OBJECT_MAPPER.createObjectNode();
         body.put("username", username);
         body.put("targetUsername", targetUsername);
-        this.post("/friends/request", body.toString(), onSuccess, onError);
+        this.post("/friends/add", body.toString(), onSuccess, onError);
     }
 
-    public void acceptFriendRequest(String username, String requesterUsername,
-                                    Consumer<JsonNode> onSuccess, Consumer<String> onError) {
+    public void removeFriend(String username, String targetUsername,
+                             Consumer<JsonNode> onSuccess, Consumer<String> onError) {
         ObjectNode body = ClientThread.OBJECT_MAPPER.createObjectNode();
         body.put("username", username);
-        body.put("requesterUsername", requesterUsername);
-        this.post("/friends/accept", body.toString(), onSuccess, onError);
-    }
-
-    public void declineFriendRequest(String username, String requesterUsername,
-                                     Consumer<JsonNode> onSuccess, Consumer<String> onError) {
-        ObjectNode body = ClientThread.OBJECT_MAPPER.createObjectNode();
-        body.put("username", username);
-        body.put("requesterUsername", requesterUsername);
-        this.post("/friends/decline", body.toString(), onSuccess, onError);
+        body.put("targetUsername", targetUsername);
+        this.post("/friends/remove", body.toString(), onSuccess, onError);
     }
 
     public void getFriends(String username, Consumer<JsonNode> onSuccess, Consumer<String> onError) {
@@ -307,5 +232,72 @@ public class ClientThread extends Thread {
         }
 
         this.close();
+    }
+
+    private void get(String path, Consumer<JsonNode> onSuccess, Consumer<String> onError) {
+        this.send(new HttpRequest("GET", path), onSuccess, onError);
+    }
+
+    private void post(String path, String jsonBody,
+                      Consumer<JsonNode> onSuccess, Consumer<String> onError) {
+        this.send(new HttpRequest("POST", path, jsonBody), onSuccess, onError);
+    }
+
+    private synchronized void send(HttpRequest req,
+                                   Consumer<JsonNode> onSuccess, Consumer<String> onError) {
+        if (this.outputStream == null) {
+            Platform.runLater(() -> onError.accept("Not connected to server."));
+            return;
+        }
+
+        this.pending = new Callback(onSuccess, onError);
+
+        try {
+            this.outputStream.writeObject(req);
+            this.outputStream.flush();
+        } catch (IOException exception) {
+            this.pending = null;
+            Platform.runLater(() -> onError.accept(String.format("Failed to send request: %s", exception.getMessage())));
+            ClientThread.LOGGER.log(Level.SEVERE, exception.getMessage(), exception);
+        }
+    }
+
+    private void dispatch(HttpResponse response) {
+        Callback callback;
+        synchronized (this) {
+            callback = this.pending;
+            this.pending  = null;
+        }
+
+        if (callback == null) {
+            ClientThread.LOGGER.warning("Received response with no pending callback");
+            return;
+        }
+
+        String body = response.getBody();
+        try {
+            JsonNode json = (body == null || body.isBlank())
+                    ? ClientThread.OBJECT_MAPPER.createObjectNode()
+                    : ClientThread.OBJECT_MAPPER.readTree(body);
+
+            if (response.isOk()) {
+                Platform.runLater(() -> callback.onSuccess.accept(json));
+            } else {
+                String error = json.has("error")
+                        ? json.get("error").asText()
+                        : String.format("Server error: %d", response.getStatusCode());
+                Platform.runLater(() -> callback.onError.accept(error));
+            }
+        } catch (Exception exception) {
+            Platform.runLater(() -> callback.onError.accept(String.format("Failed to parse response: %s", exception.getMessage())));
+        }
+    }
+
+    private synchronized void failPending(String reason) {
+        if (this.pending != null) {
+            Callback callback = this.pending;
+            this.pending = null;
+            Platform.runLater(() -> callback.onError.accept(reason));
+        }
     }
 }
