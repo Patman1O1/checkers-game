@@ -55,7 +55,7 @@ public class LoginController {
 
     public static final double SCENE_WIDTH = 480.0;
 
-    public static final double SCENE_HEIGHT = 560.0;
+    public static final double SCENE_HEIGHT = 680.0;
 
     // ── Setters ──────────────────────────────────────────────────────────────────────────────────────────────────────
     public void setSceneManager(SceneManager sceneManager) { this.sceneManager = sceneManager; }
