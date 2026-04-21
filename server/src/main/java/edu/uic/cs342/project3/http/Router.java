@@ -68,10 +68,6 @@ public class Router {
             return HttpResponse.unauthorized("Invalid username or password.");
         }
 
-        if (player.getStatus().equals(Player.Status.ONLINE)) {
-            return HttpResponse.conflict(String.format("%s is already logged in.", player.getUsername()));
-        }
-
         player.setStatus(Player.Status.ONLINE);
         PlayerRegistry.getInstance().setOnline(username);
         this.log(String.format("Login: %s", username));
@@ -139,9 +135,9 @@ public class Router {
         return HttpResponse.ok("{\"success\":true}");
     }
 
-    private HttpResponse sendFriendRequest(HttpRequest request) {
+    private HttpResponse addFriend(HttpRequest request) {
         JsonNode body = this.parseBody(request);
-        String username  = Router.str(body, "username");
+        String username   = Router.str(body, "username");
         String targetName = Router.str(body, "targetUsername");
         Player player = PlayerRegistry.getInstance().get(username);
         Player target = PlayerRegistry.getInstance().get(targetName);
@@ -149,85 +145,34 @@ public class Router {
         if (player == null) {
             return HttpResponse.notFound();
         }
-
         if (target == null) {
-            return HttpResponse.badRequest(String.format("User: '%s' not found.", targetName));
+            return HttpResponse.badRequest(String.format("User '%s' not found.", targetName));
         }
-
         if (username.equalsIgnoreCase(targetName)) {
             return HttpResponse.badRequest("You cannot add yourself.");
         }
-
         if (player.isFriend(targetName)) {
             return HttpResponse.badRequest("You are already friends.");
         }
 
-        if (player.hasSentRequestTo(targetName)) {
-            return HttpResponse.badRequest("Friend request already sent.");
-        }
-
-        if (player.hasPendingRequestFrom(targetName)) {
-            player.removeIncomingRequest(targetName);
-            target.removeOutgoingRequest(username);
-            player.addFriend(target.getUsername());
-            target.addFriend(player.getUsername());
-            PlayerRegistry.getInstance().save(player);
-            PlayerRegistry.getInstance().save(target);
-            this.log(String.format("%s and %s are now friends (auto-accepted).", username, targetName));
-            return HttpResponse.ok("{\"success\":true,\"autoAccepted\":true}");
-        }
-
-        player.addOutgoingRequest(target.getUsername());
-        target.addIncomingRequest(player.getUsername());
+        player.addFriend(target.getUsername());
         PlayerRegistry.getInstance().save(player);
-        PlayerRegistry.getInstance().save(target);
-        this.log(String.format("%s sent friend request to %s", username, targetName));
-        return HttpResponse.ok("{\"success\":true,\"autoAccepted\":false}");
+        this.log(String.format("%s added %s as a friend", username, targetName));
+        return HttpResponse.ok(String.format("{\"success\":true,\"username\":\"%s\"}", target.getUsername()));
     }
 
-    private HttpResponse acceptFriendRequest(HttpRequest request) {
+    private HttpResponse removeFriend(HttpRequest request) {
         JsonNode body = this.parseBody(request);
-        String username = Router.str(body, "username");
-        String requesterName = Router.str(body, "requesterUsername");
+        String username   = Router.str(body, "username");
+        String targetName = Router.str(body, "targetUsername");
         Player player = PlayerRegistry.getInstance().get(username);
-        Player requester = PlayerRegistry.getInstance().get(requesterName);
 
-        if (player == null || requester == null) {
+        if (player == null) {
             return HttpResponse.notFound();
         }
-
-        if (!player.hasPendingRequestFrom(requesterName)) {
-            return HttpResponse.badRequest("No pending request from that user.");
-        }
-
-
-        player.removeIncomingRequest(requesterName);
-        requester.removeOutgoingRequest(username);
-        player.addFriend(requester.getUsername());
-        requester.addFriend(player.getUsername());
+        player.removeFriend(targetName);
         PlayerRegistry.getInstance().save(player);
-        PlayerRegistry.getInstance().save(requester);
-
-        this.log(String.format("%s accepted friend request from %s", username, requesterName));
-        return HttpResponse.ok("{\"success\":true}");
-    }
-
-    private HttpResponse declineFriendRequest(HttpRequest request) {
-        JsonNode body = this.parseBody(request);
-        String username = Router.str(body, "username");
-        String requesterName = Router.str(body, "requesterUsername");
-        Player player = PlayerRegistry.getInstance().get(username);
-        Player requester = PlayerRegistry.getInstance().get(requesterName);
-
-        if (player == null || requester == null) {
-            return HttpResponse.notFound();
-        }
-
-        player.removeIncomingRequest(requesterName);
-        requester.removeOutgoingRequest(username);
-        PlayerRegistry.getInstance().save(player);
-        PlayerRegistry.getInstance().save(requester);
-        this.log(String.format("%s declined friend request from %s", username, requesterName));
+        this.log(String.format("%s removed %s from friends", username, targetName));
         return HttpResponse.ok("{\"success\":true}");
     }
 
@@ -244,7 +189,6 @@ public class Router {
             if (friend == null) {
                 continue;
             }
-
             Map<String, Object> entry = new HashMap<>();
             entry.put("username", friend.getUsername());
             entry.put("isOnline", PlayerRegistry.getInstance().isOnline(friendName));
@@ -254,8 +198,6 @@ public class Router {
 
         Map<String, Object> response = new HashMap<>();
         response.put("friends", friendList);
-        response.put("incoming", player.getIncomingFriendRequests());
-        response.put("outgoing", player.getOutgoingFriendRequests());
         return HttpResponse.ok(JsonUtil.toJson(response));
     }
 
@@ -531,16 +473,12 @@ public class Router {
                 }
             }
 
-            if (path.equals("/friends/request") && method.equals("POST")) {
-                return this.sendFriendRequest(request);
+            if (path.equals("/friends/add") && method.equals("POST")) {
+                return this.addFriend(request);
             }
 
-            if (path.equals("/friends/accept") && method.equals("POST")) {
-                return this.acceptFriendRequest(request);
-            }
-
-            if (path.equals("/friends/decline") && method.equals("POST")) {
-                return this.declineFriendRequest(request);
+            if (path.equals("/friends/remove") && method.equals("POST")) {
+                return this.removeFriend(request);
             }
 
             if (path.matches("/friends/[^/]+") && method.equals("GET")) {
