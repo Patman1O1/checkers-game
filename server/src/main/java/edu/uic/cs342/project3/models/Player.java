@@ -121,6 +121,10 @@ public class Player implements Opponent {
 
     public void removeOutgoingRequest(String to) { this.outgoingFriendRequests.remove(to); }
 
+    public void removeFriend(String friend) {
+        this.friends.removeIf(f -> f.equalsIgnoreCase(friend));
+    }
+
     public boolean isFriend(String other) {
         return this.friends.stream().anyMatch(f -> f.equalsIgnoreCase(other));
     }
