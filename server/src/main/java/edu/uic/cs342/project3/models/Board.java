@@ -49,12 +49,16 @@ public class Board {
         }
 
         @Override
-        public boolean equals(Object object) {
-            if (!(object instanceof Pos)) {
-                return false;
-            }
-            Pos other = (Pos) object;
+        public boolean equals(Object obj) {
+            if (this == obj) return true;
+            if (!(obj instanceof Pos)) return false;
+            Pos other = (Pos) obj;
             return this.rowNum == other.rowNum && this.colNum == other.colNum;
+        }
+
+        @Override
+        public int hashCode() {
+            return 31 * this.rowNum + this.colNum;
         }
     }
 
@@ -64,16 +68,6 @@ public class Board {
         public Move(Pos from, Pos to) {
             this.from = from;
             this.to = to;
-        }
-
-        @Override
-        public boolean equals(Object object) {
-            if (!(object instanceof Move)) {
-                return false;
-            }
-
-            Move other = (Move) object;
-            return this.from.equals(other.from) && this.to.equals(other.to);
         }
     }
 
