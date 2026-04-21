@@ -6,12 +6,18 @@ import edu.uic.cs342.project3.http.ClientThread;
 import com.fasterxml.jackson.databind.JsonNode;
 
 import javafx.fxml.FXML;
+import javafx.geometry.Insets;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
+import javafx.scene.control.Separator;
 import javafx.scene.control.TextField;
+import javafx.scene.layout.VBox;
+import javafx.stage.Popup;
 
 import java.net.URL;
+import java.util.LinkedHashSet;
+import java.util.SequencedCollection;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -21,178 +27,58 @@ public class LobbyController {
     // ── Fields ───────────────────────────────────────────────────────────────────────────────────────────────────────
     private final ScheduledExecutorService scheduler;
 
-    @FXML
-    private Label welcomeLabel;
-
-    @FXML
-    private Label winsLabel;
-
-    @FXML
-    private Label lossesLabel;
-
-    @FXML
-    private Label drawsLabel;
-
-    @FXML
-    private Label winRateLabel;
-
-    @FXML
-    private Label statusLabel;
-
-    @FXML
-    private ListView<String> onlineUsersList;
-
-    @FXML
-    private Button challengeButton;
-
-    @FXML
-    private ListView<String> friendsList;
-
-    @FXML
-    private Button challengeFriendButton;
-
-    @FXML
-    private TextField friendRequestField;
-
-    @FXML
-    private ListView<String> incomingRequestsList;
-
-    @FXML
-    private Label  challengeLabel;
-
-    @FXML
-    private Button acceptChallengeButton;
-
-    @FXML
-    private Button declineChallengeButton;
+    @FXML private Label            welcomeLabel;
+    @FXML private Label            winsLabel;
+    @FXML private Label            lossesLabel;
+    @FXML private Label            drawsLabel;
+    @FXML private Label            winRateLabel;
+    @FXML private Label            statusLabel;
+    @FXML private ListView<String> onlineUsersList;
+    @FXML private ListView<String> friendsList;
+    @FXML private ListView<String> challengesList;
+    @FXML private TextField        friendRequestField;
 
     private SceneManager sceneManager;
-
     private ClientThread clientThread;
-
-    private String selectedOpponent, pendingChallenger, exitedGameId;
-
     private ScheduledFuture<?> pollFuture;
+    private Popup activePopup;
 
-    public static final URL SCENE_FXML = LobbyController.class.getResource("/fxml/lobby.fxml");
+    /**
+     * Accumulated set of usernames who have sent an unresolved challenge.
+     * A LinkedHashSet keeps insertion order and prevents duplicates.
+     */
+    private final LinkedHashSet<String> pendingChallengers = new LinkedHashSet<>();
 
-    public static final double SCENE_WIDTH = 1100.0;
+    /** Game ID that the user voluntarily left — skip re-navigation to it. */
+    private String exitedGameId;
 
+    public static final URL    SCENE_FXML   = LobbyController.class.getResource("/fxml/lobby.fxml");
+    public static final double SCENE_WIDTH  = 1100.0;
     public static final double SCENE_HEIGHT = 700.0;
 
     // ── Constructors ─────────────────────────────────────────────────────────────────────────────────────────────────
     public LobbyController() {
-        this.scheduler = Executors.newSingleThreadScheduledExecutor(runnable -> {
-            Thread thread = new Thread(runnable, "lobby-poller");
-            thread.setDaemon(true);
-            return thread;
+        this.scheduler = Executors.newSingleThreadScheduledExecutor(r -> {
+            Thread t = new Thread(r, "lobby-poller");
+            t.setDaemon(true);
+            return t;
         });
     }
 
     // ── Setters ──────────────────────────────────────────────────────────────────────────────────────────────────────
-    public void setSceneManager(SceneManager sceneManager) { this.sceneManager = sceneManager; }
+    public void setSceneManager(SceneManager sm) { this.sceneManager = sm; }
+    public void setClientThread(ClientThread ct)  { this.clientThread = ct; }
 
-    public void setClientThread(ClientThread clientThread) { this.clientThread = clientThread; }
-
-    // ── Methods ──────────────────────────────────────────────────────────────────────────────────────────────────────
-    @FXML
-    private void handleChallengeSelected() {
-        if (this.selectedOpponent == null) {
-            return;
-        }
-        this.clientThread.sendChallenge(this.sceneManager.getCurrentUsername(), this.selectedOpponent,
-                json -> this.showStatus(String.format("Challenge sent to %s!", this.selectedOpponent), false),
-                error -> this.showStatus(String.format("Could not send challenge: %s", error), true));
-    }
+    // ── FXML handlers ────────────────────────────────────────────────────────────────────────────────────────────────
 
     @FXML
-    private void handleChallengeFriend() {
-        String selectedFriendName = this.friendsList.getSelectionModel().getSelectedItem();
-        if (selectedFriendName == null) {
-            return;
-        }
-
-        String friendName = selectedFriendName.replaceFirst("^[\u25cf\u25cb] ", "").split("\\s+")[0];
-        this.clientThread.sendChallenge(this.sceneManager.getCurrentUsername(), friendName,
-                json -> this.showStatus(String.format("Challenge sent to %s !", friendName), false),
-                error -> this.showStatus(String.format("Could not send challenge: %s", error), true));
-    }
-
-    @FXML
-    private void handleAcceptChallenge() {
-        if (this.pendingChallenger == null) {
-            return;
-        }
-        String challenger = this.pendingChallenger;
-        this.clientThread.acceptChallenge(this.sceneManager.getCurrentUsername(), challenger,
-                json -> {
-                    String gameId = json.path("gameId").asText();
-                    this.onLeave();
-                    this.sceneManager.showGame(gameId);
-                },
-                error -> this.showStatus(String.format("Could not accept challenge: %s", error), true));
-    }
-
-    @FXML
-    private void handleDeclineChallenge() {
-        if (this.pendingChallenger == null) {
-            return;
-        }
-
-        String challenger = this.pendingChallenger;
-        this.clientThread.declineChallenge(this.sceneManager.getCurrentUsername(), challenger,
-                json -> {
-                    this.pendingChallenger = null;
-                    this.hideChallengePanel();
-                    this.showStatus(String.format("%s's challenge declined.", challenger), false);
-                },
-                error -> this.showStatus(String.format("Error: %s", error), true));
-    }
-
-    @FXML
-    private void handleSendFriendRequest() {
+    private void handleAddFriendByField() {
         String target = this.friendRequestField.getText().trim();
-        if (target.isBlank()) {
-            this.showStatus("Enter a username.", true);
-            return;
-        }
-        this.clientThread.sendFriendRequest(this.sceneManager.getCurrentUsername(), target,
+        if (target.isBlank()) { this.showStatus("Enter a username.", true); return; }
+        this.clientThread.addFriend(this.sceneManager.getCurrentUsername(), target,
                 json -> {
                     this.friendRequestField.clear();
-                    if (json.path("autoAccepted").asBoolean(false)) {
-                        this.showStatus(String.format("%s is now your friend!", target), false);
-                    } else {
-                        this.showStatus(String.format("Friend request sent to %s.", target), false);
-                    }
-                    this.loadData();
-                },
-                error -> this.showStatus(error, true));
-    }
-
-    @FXML
-    private void handleAcceptFriendRequest() {
-        String selected = this.incomingRequestsList.getSelectionModel().getSelectedItem();
-        if (selected == null) {
-            return;
-        }
-        this.clientThread.acceptFriendRequest(this.sceneManager.getCurrentUsername(), selected,
-                json -> {
-                    this.showStatus(String.format("%s is now your friend!", selected), false);
-                    this.loadData();
-                },
-                error -> this.showStatus(error, true));
-    }
-
-    @FXML
-    private void handleDeclineFriendRequest() {
-        String selected = this.incomingRequestsList.getSelectionModel().getSelectedItem();
-        if (selected == null) {
-            return;
-        }
-
-        this.clientThread.declineFriendRequest(this.sceneManager.getCurrentUsername(), selected,
-                json -> {
-                    this.showStatus(String.format("Request from %s declined.", selected), false);
+                    this.showStatus(String.format("%s added as a friend!", target), false);
                     this.loadData();
                 },
                 error -> this.showStatus(error, true));
@@ -201,10 +87,7 @@ public class LobbyController {
     @FXML
     private void handlePlayVsAI() {
         this.clientThread.createGame(this.sceneManager.getCurrentUsername(), null, true,
-                json -> {
-                    this.onLeave();
-                    this.sceneManager.showGame(json.path("gameId").asText());
-                },
+                json -> { this.onLeave(); this.sceneManager.showGame(json.path("gameId").asText()); },
                 error -> this.showStatus(String.format("Failed to create game: %s", error), true));
     }
 
@@ -213,16 +96,151 @@ public class LobbyController {
         this.stopPolling();
         this.clientThread.logout(this.sceneManager.getCurrentUsername(),
                 json -> this.sceneManager.showLogin(),
-                error  -> this.sceneManager.showLogin());
+                error -> this.sceneManager.showLogin());
     }
+
+    // ── Popup factory ─────────────────────────────────────────────────────────────────────────────────────────────────
+
+    private void showPopup(ListView<String> anchor, String title, Button... buttons) {
+        this.closeActivePopup();
+
+        Label header = new Label(title);
+        header.setStyle("-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #e5e7eb;");
+
+        VBox box = new VBox(8, header, new Separator());
+        box.setPadding(new Insets(12));
+        box.setStyle(
+                "-fx-background-color: #1f2937;" +
+                        "-fx-border-color: #374151;"     +
+                        "-fx-border-radius: 6;"          +
+                        "-fx-background-radius: 6;"      +
+                        "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.6), 12, 0, 0, 4);"
+        );
+        for (Button btn : buttons) {
+            btn.setMaxWidth(Double.MAX_VALUE);
+            btn.setPrefWidth(210);
+            box.getChildren().add(btn);
+        }
+
+        Popup popup = new Popup();
+        popup.setAutoHide(true);
+        popup.getContent().add(box);
+        popup.setOnHidden(e -> { if (this.activePopup == popup) this.activePopup = null; });
+        this.activePopup = popup;
+
+        javafx.geometry.Bounds b = anchor.localToScreen(anchor.getBoundsInLocal());
+        if (b != null) {
+            popup.show(anchor, b.getMinX() + b.getWidth() / 2 - 105, b.getMinY() + b.getHeight() / 2);
+        }
+    }
+
+    private void closeActivePopup() {
+        if (this.activePopup != null) { this.activePopup.hide(); this.activePopup = null; }
+    }
+
+    // ── Online-list popup ─────────────────────────────────────────────────────────────────────────────────────────────
+
+    private void handleOnlineUserClick(String name) {
+        Button addBtn = styledButton("\u2795  Add Friend", "#1d4ed8");
+        addBtn.setOnAction(e -> {
+            this.closeActivePopup();
+            this.clientThread.addFriend(this.sceneManager.getCurrentUsername(), name,
+                    json -> { this.showStatus(String.format("%s added as a friend!", name), false); this.loadData(); },
+                    error -> this.showStatus(error, true));
+        });
+
+        Button challengeBtn = styledButton("\u2694  Challenge", "#b45309");
+        challengeBtn.setOnAction(e -> {
+            this.closeActivePopup();
+            this.clientThread.sendChallenge(this.sceneManager.getCurrentUsername(), name,
+                    json -> this.showStatus(String.format("Challenge sent to %s!", name), false),
+                    error -> this.showStatus(String.format("Could not challenge: %s", error), true));
+        });
+
+        this.showPopup(this.onlineUsersList, name, addBtn, challengeBtn);
+    }
+
+    // ── Friends-list popup ────────────────────────────────────────────────────────────────────────────────────────────
+
+    private void handleFriendClick(String item) {
+        String name = item.replaceFirst("^[\u25cf\u25cb]\\s*", "").split("\\s+")[0];
+
+        Button challengeBtn = styledButton("\u2694  Challenge", "#b45309");
+        challengeBtn.setOnAction(e -> {
+            this.closeActivePopup();
+            this.clientThread.sendChallenge(this.sceneManager.getCurrentUsername(), name,
+                    json -> this.showStatus(String.format("Challenge sent to %s!", name), false),
+                    error -> this.showStatus(String.format("Could not challenge: %s", error), true));
+        });
+
+        Button removeBtn = styledButton("\uD83D\uDDD1  Remove Friend", "#7f1d1d");
+        removeBtn.setOnAction(e -> {
+            this.closeActivePopup();
+            this.clientThread.removeFriend(this.sceneManager.getCurrentUsername(), name,
+                    json -> { this.showStatus(String.format("%s removed from friends.", name), false); this.loadData(); },
+                    error -> this.showStatus(error, true));
+        });
+
+        this.showPopup(this.friendsList, name, challengeBtn, removeBtn);
+    }
+
+    // ── Challenges-list popup ─────────────────────────────────────────────────────────────────────────────────────────
+
+    private void handleChallengeClick(String challenger) {
+        Button acceptBtn = styledButton("\u2705  Accept", "#15803d");
+        acceptBtn.setOnAction(e -> {
+            this.closeActivePopup();
+            this.clientThread.acceptChallenge(this.sceneManager.getCurrentUsername(), challenger,
+                    json -> {
+                        this.pendingChallengers.remove(challenger);
+                        this.refreshChallengesList();
+                        this.onLeave();
+                        this.sceneManager.showGame(json.path("gameId").asText());
+                    },
+                    error -> this.showStatus(String.format("Could not accept: %s", error), true));
+        });
+
+        Button declineBtn = styledButton("\u274C  Decline", "#7f1d1d");
+        declineBtn.setOnAction(e -> {
+            this.closeActivePopup();
+            this.clientThread.declineChallenge(this.sceneManager.getCurrentUsername(), challenger,
+                    json -> {
+                        this.pendingChallengers.remove(challenger);
+                        this.refreshChallengesList();
+                        this.showStatus(String.format("%s's challenge declined.", challenger), false);
+                    },
+                    error -> this.showStatus(String.format("Could not decline: %s", error), true));
+        });
+
+        this.showPopup(this.challengesList,
+                String.format("%s challenged you!", challenger),
+                acceptBtn, declineBtn);
+    }
+
+    // ── Challenges list refresh ───────────────────────────────────────────────────────────────────────────────────────
+
+    private void refreshChallengesList() {
+        this.challengesList.getItems().setAll(this.pendingChallengers);
+    }
+
+    // ── Helper ────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+    private static Button styledButton(String text, String bgColor) {
+        Button btn = new Button(text);
+        btn.setStyle(String.format(
+                "-fx-background-color: %s; -fx-text-fill: white; -fx-background-radius: 4;", bgColor));
+        return btn;
+    }
+
+    // ── Data loading ─────────────────────────────────────────────────────────────────────────────────────────────────
 
     private void loadData() {
         String username = this.sceneManager.getCurrentUsername();
         this.clientThread.getOnlineUsers(
-                jsonNode -> {
+                json -> {
                     this.onlineUsersList.getItems().clear();
-                    for (JsonNode userNode : jsonNode.path("users")) {
-                        String name = userNode.asText();
+                    for (JsonNode u : json.path("users")) {
+                        String name = u.asText();
                         if (!name.equals(username)) {
                             this.onlineUsersList.getItems().add(name);
                         }
@@ -237,24 +255,17 @@ public class LobbyController {
 
     private void loadFriends(String username) {
         this.clientThread.getFriends(username,
-                jsonNode -> {
+                json -> {
                     this.friendsList.getItems().clear();
-                    for (JsonNode friendNode : jsonNode.path("friends")) {
-                        String name = friendNode.path("username").asText();
-
-                        int wins = friendNode.path("stats").path("wins").asInt();
-                        int losses = friendNode.path("stats").path("losses").asInt();
-                        int draws = friendNode.path("stats").path("draws").asInt();
-
-                        if (friendNode.path("isOnline").asBoolean()) {
-                            this.friendsList.getItems().add(String.format("\u25cf %s W:%d L:%d D:%d", name, wins, losses, draws));
-                        } else {
-                            this.friendsList.getItems().add(String.format("\u25cb %s W:%d L:%d D:%d", name, wins, losses, draws));
-                        }
-                    }
-                    this.incomingRequestsList.getItems().clear();
-                    for (JsonNode requestNode : jsonNode.path("incoming")) {
-                        this.incomingRequestsList.getItems().add(requestNode.asText());
+                    for (JsonNode f : json.path("friends")) {
+                        String  name   = f.path("username").asText();
+                        boolean online = f.path("isOnline").asBoolean();
+                        int w = f.path("stats").path("wins").asInt();
+                        int l = f.path("stats").path("losses").asInt();
+                        int d = f.path("stats").path("draws").asInt();
+                        this.friendsList.getItems().add(String.format(
+                                "%s %s  W:%d L:%d D:%d",
+                                online ? "\u25cf" : "\u25cb", name, w, l, d));
                     }
                     this.loadStats(username);
                 },
@@ -267,20 +278,16 @@ public class LobbyController {
     private void loadStats(String username) {
         this.clientThread.getUserStats(username,
                 json -> {
-                    JsonNode statsNode = json.path("stats");
-                    int wins = statsNode.path("wins").asInt();
-                    int losses = statsNode.path("losses").asInt();
-                    int draws = statsNode.path("draws").asInt();
-                    int total = wins + losses + draws;
-
+                    JsonNode s = json.path("stats");
+                    int wins   = s.path("wins").asInt();
+                    int losses = s.path("losses").asInt();
+                    int draws  = s.path("draws").asInt();
+                    int total  = wins + losses + draws;
                     this.winsLabel.setText(String.valueOf(wins));
                     this.lossesLabel.setText(String.valueOf(losses));
                     this.drawsLabel.setText(String.valueOf(draws));
-                    if (total > 0) {
-                        this.winRateLabel.setText(String.format("%.1f%%", wins * 100.0 / total));
-                    } else {
-                        this.winRateLabel.setText("0.0%");
-                    }
+                    this.winRateLabel.setText(total > 0
+                            ? String.format("%.1f%%", wins * 100.0 / total) : "0.0%");
                     this.loadChallenge(username);
                 },
                 error -> {
@@ -294,11 +301,10 @@ public class LobbyController {
                 json -> {
                     String challenger = json.path("challenger").asText(null);
                     if (challenger != null && !challenger.isBlank()) {
-                        this.pendingChallenger = challenger;
-                        this.showChallengePanel(challenger);
-                    } else if (this.pendingChallenger != null) {
-                        this.pendingChallenger = null;
-                        this.hideChallengePanel();
+                        // Add to the set; if new, refresh the list
+                        if (this.pendingChallengers.add(challenger)) {
+                            this.refreshChallengesList();
+                        }
                     }
                     this.loadActiveGame(username);
                 },
@@ -317,76 +323,60 @@ public class LobbyController {
                 error -> { /* silent */ });
     }
 
+    // ── Polling ───────────────────────────────────────────────────────────────────────────────────────────────────────
+
     private void startPolling() {
         this.stopPolling();
         this.pollFuture = this.scheduler.scheduleAtFixedRate(this::loadData, 3L, 3L, TimeUnit.SECONDS);
     }
 
     private void stopPolling() {
-        if (this.pollFuture != null) {
-            this.pollFuture.cancel(false);
-            this.pollFuture = null;
-        }
+        if (this.pollFuture != null) { this.pollFuture.cancel(false); this.pollFuture = null; }
     }
 
-    private void showChallengePanel(String challenger) {
-        this.challengeLabel.setText(String.format("%s challenged you!", challenger));
-
-        this.challengeLabel.setVisible(true);
-        this.challengeLabel.setManaged(true);
-
-        this.acceptChallengeButton.setVisible(true);
-        this.acceptChallengeButton.setManaged(true);
-
-        this.declineChallengeButton.setVisible(true);
-        this.declineChallengeButton.setManaged(true);
-    }
-
-    private void hideChallengePanel() {
-        this.challengeLabel.setVisible(false);
-        this.challengeLabel.setManaged(false);
-
-        this.acceptChallengeButton.setVisible(false);
-        this.acceptChallengeButton.setManaged(false);
-
-        this.declineChallengeButton.setVisible(false);
-        this.declineChallengeButton.setManaged(false);
-    }
+    // ── UI helpers ────────────────────────────────────────────────────────────────────────────────────────────────────
 
     private void showStatus(String message, boolean wasError) {
         this.statusLabel.setText(message);
-
-        if (wasError) {
-            this.statusLabel.setStyle("-fx-text-fill: #f87171;");
-        } else {
-            this.statusLabel.setStyle("-fx-text-fill: #4ade80;");
-        }
-
+        this.statusLabel.setStyle(wasError ? "-fx-text-fill: #f87171;" : "-fx-text-fill: #4ade80;");
         this.statusLabel.setVisible(true);
         this.statusLabel.setManaged(true);
     }
 
+    // ── FXML lifecycle ────────────────────────────────────────────────────────────────────────────────────────────────
+
     @FXML
     public void initialize() {
-        this.challengeButton.setDisable(true);
-        this.hideChallengePanel();
+        this.onlineUsersList.setOnMouseClicked(event -> {
+            String sel = this.onlineUsersList.getSelectionModel().getSelectedItem();
+            if (sel != null) {
+                this.handleOnlineUserClick(sel);
+            }
+        });
 
-        this.onlineUsersList.getSelectionModel().selectedItemProperty()
-                .addListener((obs, old, val) -> {
-                    this.selectedOpponent = val;
-                    this.challengeButton.setDisable(val == null);
-                });
+        this.friendsList.setOnMouseClicked(event -> {
+            String sel = this.friendsList.getSelectionModel().getSelectedItem();
+            if (sel != null) {
+                this.handleFriendClick(sel);
+            }
+        });
+
+        this.challengesList.setOnMouseClicked(event -> {
+            String sel = this.challengesList.getSelectionModel().getSelectedItem();
+            if (sel != null) {
+                this.handleChallengeClick(sel);
+            }
+        });
     }
 
     public void onEnter() {
         this.welcomeLabel.setText(String.format("Welcome, %s!", this.sceneManager.getCurrentUsername()));
-        this.challengeButton.setDisable(true);
-
-        this.selectedOpponent = null;
-        this.pendingChallenger = null;
-
+        this.pendingChallengers.clear();
+        this.challengesList.getItems().clear();
         this.onlineUsersList.getSelectionModel().clearSelection();
-        this.hideChallengePanel();
+        this.friendsList.getSelectionModel().clearSelection();
+        this.challengesList.getSelectionModel().clearSelection();
+        this.closeActivePopup();
         this.loadData();
         this.startPolling();
     }
@@ -396,5 +386,8 @@ public class LobbyController {
         this.onEnter();
     }
 
-    public void onLeave() { this.stopPolling(); }
+    public void onLeave() {
+        this.stopPolling();
+        this.closeActivePopup();
+    }
 }
