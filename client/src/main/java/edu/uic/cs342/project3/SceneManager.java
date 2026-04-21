@@ -87,7 +87,7 @@ public class SceneManager {
     public void showLogin() {
         ((LoginController) this.loginLoader.getController()).reset();
 
-        this.primaryStage.setTitle("Checkers Online \u2013 Login");
+        this.primaryStage.setTitle("Checkers Online – Login");
         this.primaryStage.setScene(this.loginScene);
         this.primaryStage.show();
     }
@@ -97,7 +97,7 @@ public class SceneManager {
 
         ((LobbyController) this.lobbyLoader.getController()).onEnter();
 
-        this.primaryStage.setTitle(String.format("Checkers Online \u2013 Lobby  [%s]", username));
+        this.primaryStage.setTitle(String.format("Checkers Online – Lobby  [%s]", username));
         this.primaryStage.setScene(this.lobbyScene);
     }
 
@@ -106,7 +106,7 @@ public class SceneManager {
 
         ((LobbyController) this.lobbyLoader.getController()).onEnterFromGame(leftGameId);
 
-        this.primaryStage.setTitle(String.format("Checkers Online \u2013 Lobby  [%s]", username));
+        this.primaryStage.setTitle(String.format("Checkers Online – Lobby  [%s]", username));
         this.primaryStage.setScene(this.lobbyScene);
     }
 
@@ -115,7 +115,7 @@ public class SceneManager {
 
         ((GameController) this.gameLoader.getController()).onEnter(gameId, this.currentUsername);
 
-        this.primaryStage.setTitle("Checkers Online \u2013 Game");
+        this.primaryStage.setTitle("Checkers Online – Game");
         this.primaryStage.setScene(this.gameScene);
     }
 }
