@@ -289,7 +289,7 @@ public class LobbyController {
                         int draws = friendNode.path("stats").path("draws").asInt();
 
                         this.friendsList.getItems().add(String.format(
-                                "%s %s  W:%d wins L:%d losses D:%d draws",
+                                "%s %s  W:%d L:%d D:%d",
                                 online ? "●" : "○", name, wins, losses, draws));
                     }
                     this.loadStats(username);
