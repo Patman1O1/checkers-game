@@ -1,0 +1,150 @@
+package edu.uic.cs342.project3.models;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
+
+public class CheckersGame {
+    // ── Status ───────────────────────────────────────────────────────────────────────────────────────────────────────
+    public static enum Status {
+        // ── Constants ────────────────────────────────────────────────────────────────────────────────────────────────
+        WAITING,
+        ACTIVE,
+        COMPLETED;
+    }
+
+    // ── Chat Entry ───────────────────────────────────────────────────────────────────────────────────────────────────
+    public static class ChatEntry {
+        // ── Fields ───────────────────────────────────────────────────────────────────────────────────────────────────
+        @JsonProperty("player")
+        public String player;
+
+        @JsonProperty("message")
+        public String message;
+
+        @JsonProperty("timestamp")
+        public String timestamp;
+
+        // ── Constructors ─────────────────────────────────────────────────────────────────────────────────────────────
+        public ChatEntry() {
+            this.player = null;
+            this.message = null;
+            this.timestamp = null;
+        }
+
+        public ChatEntry(String player, String message) {
+            this.player = player;
+            this.message = message;
+            this.timestamp = Instant.now().toString();
+        }
+    }
+
+    // ── Fields ───────────────────────────────────────────────────────────────────────────────────────────────────────
+    @JsonProperty("id")          private final String          id;
+    @JsonProperty("player1")     private final String          player1;
+    @JsonProperty("player2")     private       String          player2;
+    @JsonProperty("vsAI")        private final boolean         vsAI;
+    @JsonProperty("board")       private final Board           board;
+    @JsonProperty("currentTurn") private       Color           currentTurn;
+    @JsonProperty("status")      private       Status          status;
+    @JsonProperty("winner")      private       String          winner;
+    @JsonProperty("chat")        private       List<ChatEntry> chat;
+
+    // ── Constructors ─────────────────────────────────────────────────────────────────────────────────────────────────
+    // Main constructor used when actually creating a game
+    public CheckersGame(String player1, String player2, boolean vsAI) {
+        this.id = UUID.randomUUID().toString(); // Creates a unique 128-bit numeric ID for the game
+        this.player1 = player1;
+        this.player2 = vsAI ? "AI" : player2;
+        this.vsAI = vsAI;
+        this.board = new Board();
+        this.currentTurn = Color.RED;
+        this.status = CheckersGame.Status.ACTIVE;
+        this.winner = null;
+        this.chat = new ArrayList<>();
+    }
+
+    // Default constructor is needed for Jackson
+    public CheckersGame() {
+        this.id = UUID.randomUUID().toString(); // Creates a unique 128-bit numeric ID for the game
+        this.player1 = "";
+        this.vsAI = false;
+        this.board = new Board();
+    }
+
+    // ── Setters ──────────────────────────────────────────────────────────────────────────────────────────────────────
+    public void setPlayer2(String player2) { this.player2 = player2; }
+
+    public void setCurrentTurn(Color currentTurn) { this.currentTurn = currentTurn; }
+
+    public void setStatus(Status status) { this.status = status; }
+
+    public void setWinner(String winner) { this.winner = winner; }
+
+    // ── Getters ──────────────────────────────────────────────────────────────────────────────────────────────────────
+    public String getId() { return this.id; }
+
+    public String getPlayer1() { return this.player1; }
+
+    public String getPlayer2() { return this.player2; }
+
+    public boolean isVsAI() { return this.vsAI; }
+
+    public Board getBoard() { return this.board; }
+
+    public Color getCurrentTurn() { return this.currentTurn; }
+
+    public Status getStatus() { return this.status; }
+
+    public String getWinner() { return this.winner; }
+
+    public List<ChatEntry> getChat() { return this.chat; }
+
+    // ── Methods ──────────────────────────────────────────────────────────────────────────────────────────────────────
+    public void addChat(String player, String message) { this.chat.add(new CheckersGame.ChatEntry(player, message)); }
+
+    public void flipTurn() { this.currentTurn = this.currentTurn.opposite(); }
+
+    public void endGame(String outcome) {
+        this.winner = outcome;
+        this.status = CheckersGame.Status.COMPLETED;
+    }
+
+    public boolean hasPlayer(String username) {
+        return this.player1.equalsIgnoreCase(username) || this.player2.equalsIgnoreCase(username);
+    }
+
+    public Color colorOf(String username) { return this.player1.equalsIgnoreCase(username) ? Color.RED : Color.BLACK; }
+
+    // Processes one player's turn: validates the move, applies it, checks for game end, flips the turn
+    public String takeTurn(Opponent opponent, Board.Pos from, Board.Pos to) {
+        Color playerColor = this.colorOf(opponent.getName());
+
+        // Special case: if AI has no moves left, the human wins immediately
+        if (opponent instanceof AiPlayer && this.board.validMoves(Color.BLACK).isEmpty()) {
+            this.endGame(Color.RED.getValue()); // Red wins — AI is stuck
+            return null;
+        }
+
+        String error = opponent.applyMove(this.board, playerColor, this.currentTurn, from, to);
+
+        // Move was invalid — return the error message to the caller
+        if (error != null) {
+            return error;
+        }
+
+        // Check if the move ended the game
+        String outcome = this.board.checkOutcome();
+        if (outcome != null) {
+            this.endGame(outcome);
+        } else {
+            this.flipTurn();
+        }
+
+        // Return null for a successful move
+        return null;
+    }
+}

@@ -1,0 +1,9 @@
+{
+  "status" : "ONLINE",
+  "username" : "player1",
+  "password" : "password",
+  "wins" : 0,
+  "losses" : 0,
+  "draws" : 0,
+  "friends" : [ "player2" ]
+}
